@@ -8,13 +8,14 @@ class Solver(Wrapper):
         super().__init__(**kwargs)
         self.parser = self.parse_to_list
         self.input = super().load_input()
+        self.calories_per_elf = self.get_calories_per_elf()
 
     def parse_custom(self, path):
         with open(path) as f:
             for line in f:
                 pass
 
-    def task_1(self):
+    def get_calories_per_elf(self):
         elf_calories = []
         single_elf_cals = 0
         for item in self.input:
@@ -25,16 +26,18 @@ class Solver(Wrapper):
                 single_elf_cals = 0
                 continue
         elf_calories.append(single_elf_cals)
-        print(elf_calories)
-        return max(elf_calories)
+        return elf_calories
+
+    def task_1(self):
+        return max(self.calories_per_elf)
 
     def task_2(self):
-        pass
+        return sum(sorted(self.calories_per_elf)[-3:])
 
 
-part = 1
+part = 2
 solve_example = False
-example_solutions = [24_000, None]
+example_solutions = [24_000, 45000]
 
 solver = Solver(day=1, example=solve_example, example_solutions=example_solutions)
 if solve_example:
