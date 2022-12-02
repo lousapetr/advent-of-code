@@ -50,13 +50,37 @@ class Solver(Wrapper):
         mapped_hands = self.remap_hands(self.input, hand_map)
         return self.get_total_score(mapped_hands)
 
+    @staticmethod
+    def find_hand(orig_line: str):
+        """
+        X = lose, Y = draw, Z = win
+
+        return correct hands combination for desired output
+        """
+        orig_line = orig_line.replace(" ", "")
+        opponent = orig_line[0]
+        desired = orig_line[1]
+
+        loses = {"A": "C", "B": "A", "C": "B"}  # winner: loser
+        wins = {loser: winner for winner, loser in loses.items()}
+
+        if desired == "Y":
+            return f"{opponent} {opponent}"
+        elif desired == "X":
+            return f"{opponent} {loses[opponent]}"
+        elif desired == "Z":
+            return f"{opponent} {wins[opponent]}"
+        else:
+            raise ValueError("invalid desired output")
+
     def task_2(self):
-        pass
+        played_hands = [self.find_hand(hand) for hand in self.input]
+        return self.get_total_score(played_hands)
 
 
-part = 1
+part = 2
 solve_example = False
-example_solutions = [15, None]
+example_solutions = [15, 12]
 
 solver = Solver(day=2, example=solve_example, example_solutions=example_solutions)
 if solve_example:
