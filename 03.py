@@ -1,4 +1,5 @@
 from wrapper import Wrapper
+from typing import List, Set
 
 # https://adventofcode.com/2021/day/3
 
@@ -17,6 +18,10 @@ class Solver(Wrapper):
         return part1, part2
 
     @staticmethod
+    def get_common(rucksacks: List[str]) -> str:
+        return set.intersection(*[set(r) for r in rucksacks]).pop()
+
+    @staticmethod
     def get_priority(letter: str) -> int:
         return (ord(letter) % 64 + 26) % 58
 
@@ -24,17 +29,21 @@ class Solver(Wrapper):
         result = 0
         for r in self.input:
             parts = self.split_parts(r)
-            common = set(parts[0]) & set(parts[1])
-            result += self.get_priority(common.pop())
+            common = self.get_common(parts)
+            result += self.get_priority(common)
         return result
 
     def task_2(self):
-        pass
+        result = 0
+        for i in range(0, len(self.input), 3):
+            common = self.get_common(self.input[i : i + 3])
+            result += self.get_priority(common)
+        return result
 
 
-part = 1
+part = 2
 solve_example = False
-example_solutions = [157, None]
+example_solutions = [157, 70]
 
 solver = Solver(day=3, example=solve_example, example_solutions=example_solutions)
 if solve_example:
