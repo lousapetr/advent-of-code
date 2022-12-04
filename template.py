@@ -1,10 +1,10 @@
 from wrapper import Wrapper
+from typing import List, Tuple, Set, Dict
 
 # https://adventofcode.com/2021/day/DAY_NUMBER
 
 
 class Solver(Wrapper):
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.parser = self.parse_custom
@@ -26,7 +26,9 @@ part = 1
 solve_example = True
 example_solutions = [MISSING, None]
 
-solver = Solver(day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions)
+solver = Solver(
+    day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions
+)
 if solve_example:
     solver.print_input()
 solver.solve_task(1)
