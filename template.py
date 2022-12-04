@@ -24,6 +24,7 @@ class Solver(Wrapper):
 
 part = 1
 solve_example = True
+# solve_example = False
 example_solutions = [MISSING, None]
 
 solver = Solver(
