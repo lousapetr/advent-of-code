@@ -46,6 +46,7 @@ then
 else
     echo "Downloading input from ${input_url}"
     curl --cookie "session=${TOKEN}" "$input_url" --output "$input_file"
+    echo "================================"
 
     if grep -q -e "Please don't .* before it unlocks!" -e "404 Not Found" "$input_file"
     then
