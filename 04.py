@@ -30,16 +30,26 @@ class Solver(Wrapper):
             return True  # left fully contains right
         return False
 
+    @staticmethod
+    def overlaps(sections: List[Tuple[int, int]]) -> bool:
+        left, right = sections
+        if max(left) < min(right):
+            return False
+        if min(left) > max(right):
+            return False
+        return True
+
     def task_1(self):
         return sum(map(self.contains, self.input))
 
     def task_2(self):
-        pass
+        return sum(map(self.overlaps, self.input))
 
 
-part = 1
+part = 2
+solve_example = True
 solve_example = False
-example_solutions = [2, None]
+example_solutions = [2, 4]
 
 solver = Solver(day=4, example=solve_example, example_solutions=example_solutions)
 if solve_example:
