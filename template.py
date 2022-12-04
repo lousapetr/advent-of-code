@@ -1,7 +1,9 @@
 from wrapper import Wrapper
-from typing import List, Tuple, Set, Dict
+from typing import List, Tuple, Set, Dict  # noqa: F401
 
-# https://adventofcode.com/2021/day/DAY_NUMBER
+# $DAILY_URL
+
+DAY_NUMBER = None
 
 
 class Solver(Wrapper):
@@ -16,16 +18,16 @@ class Solver(Wrapper):
                 pass
 
     def task_1(self):
-        pass
+        return NotImplemented
 
     def task_2(self):
-        pass
+        return NotImplemented
 
 
 part = 1
 solve_example = True
 # solve_example = False
-example_solutions = [MISSING, None]
+example_solutions = [None, None]
 
 solver = Solver(
     day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions
