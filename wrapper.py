@@ -1,26 +1,27 @@
 import pandas as pd
 import numpy as np
-from typing import Sequence, List, Any
+from typing import Sequence, List, Any, Callable, Optional
 import sys
 import os
 import time
 import pprint
+from abc import ABC, abstractmethod
 
 
 class HiddenPrints:
-    """Helper class for suppressing printing
-    """
+    """Helper class for suppressing printing"""
+
     # https://stackoverflow.com/a/45669280/9003767
     def __enter__(self):
         self._original_stdout = sys.stdout
-        sys.stdout = open(os.devnull, 'w')
+        sys.stdout = open(os.devnull, "w")
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         sys.stdout.close()
         sys.stdout = self._original_stdout
 
 
-class Wrapper:
+class Wrapper(ABC):
     def __init__(self, day: int, example: bool, example_solutions: Sequence[int]):
         """
         Parameters
@@ -37,9 +38,10 @@ class Wrapper:
         self.day = day
         self.example = example
         self.example_solutions = example_solutions
-        self.input_path = f'./inputs/{self.day:02d}_input.txt'
-        self.example_path = f'./inputs/{self.day:02d}_input_example.txt'
-        self.parser = None
+        self.input_path = f"./inputs/{self.day:02d}_input.txt"
+        self.example_path = f"./inputs/{self.day:02d}_input_example.txt"
+        self.input = None
+        self.parser: Callable = self.parse_custom
 
     def load_input(self, **kwargs) -> Any:
         """Wrapper for various parsers, selects appropriate path according to `self.example`
@@ -56,13 +58,12 @@ class Wrapper:
         return self.parser(path, **kwargs)
 
     def print_input(self):
-        """Pretty print the parsed input
-        """
-        print('=' * 15)
-        print('Input:')
+        """Pretty print the parsed input"""
+        print("=" * 15)
+        print("Input:")
         pprint.pprint(self.input)
 
-    def parse_to_list(self, path: str, comment: str = '#') -> List[str]:
+    def parse_to_list(self, path: str, comment: str = "#") -> List[str]:
         """Parse input file to list of lines
 
         Parameters
@@ -94,11 +95,12 @@ class Wrapper:
         pd.DataFrame
             dataframe interpreting the input file as CSV
         """
-        kwargs.setdefault('delimiter', ' ')
-        kwargs.setdefault('header', None)
-        kwargs.setdefault('names', None)
-        kwargs.setdefault('dtype', int)
-        df = pd.read_csv(path, **kwargs)
+        kwargs.setdefault("delimiter", " ")
+        kwargs.setdefault("header", None)
+        kwargs.setdefault("names", None)
+        kwargs.setdefault("dtype", int)
+        text_reader = pd.read_csv(path, **kwargs)
+        df = pd.concat(text_reader, ignore_index=True)
         return df
 
     def parse_to_array(self, path: str) -> np.ndarray:
@@ -115,27 +117,24 @@ class Wrapper:
             numpy array of integers
         """
         line_list = self.parse_to_list(path)
-        matrix = [[int(i) for i in x] for x in line_list if x[0] != '#']
+        matrix = [[int(i) for i in x] for x in line_list if x[0] != "#"]
         return np.array(matrix)
 
     def parse_custom(self):
         pass
 
-    def array_to_string(self, matrix: str, format: str = '1d', delimiter: str = '') -> str:
+    def array_to_string(
+        self, matrix: str, format: str = "1d", delimiter: str = ""
+    ) -> str:
         """
         Create string representation of numpy matrix
         """
-        return '\n'.join(
-            f'{delimiter}'.join(
-                f'{num:{format}}' for num in row
-            ) for row in matrix
+        return "\n".join(
+            f"{delimiter}".join(f"{num:{format}}" for num in row) for row in matrix
         )
 
     def solve_task(
-        self,
-        task_number: int,
-        verbose: bool = None,
-        time_fmt: str = ',.1f'
+        self, task_number: int, verbose: Optional[bool] = None, time_fmt: str = ",.1f"
     ):
         """Wrapper for solving tasks
 
@@ -155,8 +154,8 @@ class Wrapper:
         time_fmt : str, optional
             format for printing elapsed time, by default ',.1f'
         """
-        print('=' * 15)
-        print(f'Task {task_number}')
+        print("=" * 15)
+        print(f"Task {task_number}")
         if verbose is None:
             verbose = self.example  # be verbose if solving example
 
@@ -164,6 +163,10 @@ class Wrapper:
             task_func = self.task_1
         elif task_number == 2:
             task_func = self.task_2
+        else:
+            raise ValueError(
+                f"Incorrect task number - {task_number}. Must equal to 1 or 2."
+            )
 
         if verbose:
             start_time = time.perf_counter()
@@ -176,12 +179,20 @@ class Wrapper:
                 end_time = time.perf_counter()
 
         time_ms = (end_time - start_time) * 1000
-        print(f'Elapsed time: {time_ms:{time_fmt}} ms')
+        print(f"Elapsed time: {time_ms:{time_fmt}} ms")
         if self.example:
             example_solution = self.example_solutions[task_number - 1]
             if result != example_solution:
-                print('Incorrect solution!')
-                print(f'Got {result}, should get {example_solution}')
+                print("Incorrect solution!")
+                print(f"Should get:  {example_solution}")
+                print(f"Got instead: {result}")
                 quit()
         print("Result:", result)
 
+    @abstractmethod
+    def task_1(self) -> int:
+        pass
+
+    @abstractmethod
+    def task_2(self) -> int:
+        pass
