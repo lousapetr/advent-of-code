@@ -9,22 +9,32 @@ TOKEN=$(cat aoc_token.txt)
 
 ##############################
 # Read day number, set paths
-DAY_NUMBER=$1
+case $# in
+    0)
+        LC_ALL=en_US date "+Today is %A, %Y-%m-%d"
+        echo ""
+        DAY_NUMBER=$(date "+%d" | sed "s/^0//")
+        ;;
+    1)
+        case $1 in
+            [0-9]|[0-9][0-9])
+                DAY_NUMBER=$1
+                ;;
+            *)
+                echo "Invalid argument, aborting"
+                echo "Use integer day number as argument"
+                exit 1
+                ;;
+        esac
+        ;;
+    *)
+        echo "Too many arguments, aborting"
+        echo "Use integer day number as argument"
+        exit 1
+        ;;
+esac
 
-# check if there are any parameters
-if [ $# -eq 0 ]
-then
-    echo "No arguments supplied, aborting"
-    echo "Use day number as parameter"
-    exit
-elif [ -z "${DAY_NUMBER##*[!0-9]*}" ]  # https://stackoverflow.com/a/2704760/9003767
-then
-    echo "Non-integer supplied, aborting"
-    echo "Use day number as parameter"
-    exit
-else
-    echo "Day $DAY_NUMBER begins!"
-fi
+echo "Day $DAY_NUMBER begins!"
 
 DAY_PAD=$(printf '%02s' $DAY_NUMBER)
 
