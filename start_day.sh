@@ -6,9 +6,10 @@ YEAR=2022
 # and save to file 'aoc_token.txt' - add it to .gitignore to not share
 TOKEN=$(cat aoc_token.txt)
 
+HELP=""
 
 ##############################
-# Read day number, set paths
+# Parse arguments
 case $# in
     0)
         LC_ALL=en_US date "+Today is %A, %Y-%m-%d"
@@ -19,6 +20,9 @@ case $# in
         case $1 in
             [0-9]|[0-9][0-9])
                 DAY_NUMBER=$1
+                ;;
+            -h|--help)
+                echo "$HELP"
                 ;;
             *)
                 echo "Invalid argument, aborting"
@@ -34,6 +38,8 @@ case $# in
         ;;
 esac
 
+##############################
+# Set paths
 echo "Day $DAY_NUMBER begins!"
 
 DAY_PAD=$(printf '%02s' $DAY_NUMBER)
