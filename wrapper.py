@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from typing import Sequence, List, Any, Callable, Optional
+from typing import Sequence, List, Any, Callable, Optional, Union
 import sys
 import os
 import time
@@ -190,9 +190,9 @@ class Wrapper(ABC):
         print("Result:", result)
 
     @abstractmethod
-    def task_1(self) -> int:
+    def task_1(self) -> Union[int, str]:
         pass
 
     @abstractmethod
-    def task_2(self) -> int:
+    def task_2(self) -> Union[int, str]:
         pass
