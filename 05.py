@@ -10,6 +10,9 @@ class Solver(Wrapper):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.parser = self.parse_custom
+        self.reset()
+
+    def reset(self):
         self.input = super().load_input()
         self.cargo, self.moves = self.input
 
@@ -50,26 +53,31 @@ class Solver(Wrapper):
             crate = self.cargo[move["from"]].pop()
             self.cargo[move["to"]].append(crate)
 
+    def move_crates_multi(self, move: Dict[str, int]):
+        crates = self.cargo[move["from"]][-move["count"] :]
+        self.cargo[move["from"]] = self.cargo[move["from"]][: -move["count"]]
+        self.cargo[move["to"]] += crates
+
     def get_top_crates(self) -> str:
         top_crates = [stack[-1] for stack in self.cargo]
         return "".join(top_crates)
 
     def task_1(self):
         for move in self.moves:
-            # print(move)
             self.move_crates(move)
-            # print(self.cargo)
-        # print(self.cargo)
         return self.get_top_crates()
 
     def task_2(self):
-        return NotImplemented
+        self.reset()
+        for move in self.moves:
+            self.move_crates_multi(move)
+        return self.get_top_crates()
 
 
-part = 1
+part = 2
 solve_example = True
 solve_example = False
-example_solutions = ["CMZ", None]
+example_solutions = ["CMZ", "MCD"]
 
 solver = Solver(
     day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions
