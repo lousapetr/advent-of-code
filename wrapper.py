@@ -22,7 +22,9 @@ class HiddenPrints:
 
 
 class Wrapper(ABC):
-    def __init__(self, day: int, example: bool, example_solutions: Sequence[int]):
+    def __init__(
+        self, day: int, example: bool, example_solutions: Sequence[Union[int, str]]
+    ):
         """
         Parameters
         ----------
