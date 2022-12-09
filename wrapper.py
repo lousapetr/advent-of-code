@@ -127,7 +127,7 @@ class Wrapper(ABC):
         pass
 
     def array_to_string(
-        self, matrix: str, format: str = "1d", delimiter: str = ""
+        self, matrix: np.ndarray, format: str = "1d", delimiter: str = ""
     ) -> str:
         """
         Create string representation of numpy matrix
