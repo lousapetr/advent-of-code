@@ -2,6 +2,8 @@ from wrapper import Wrapper
 from typing import List, Tuple, Set, Dict  # noqa: F401
 import numpy as np
 
+marek = __import__("08_marek")
+
 # https://adventofcode.com/2022/day/8
 
 DAY_NUMBER = 8
@@ -10,7 +12,8 @@ DAY_NUMBER = 8
 class Solver(Wrapper):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.parser = self.parse_to_array
+        # self.parser = self.parse_to_array
+        self.parser = self.parse_to_list
 
     @staticmethod
     def find_visible_from_north(forest: np.ndarray) -> np.ndarray:
@@ -48,14 +51,15 @@ class Solver(Wrapper):
         print(pretty_forest)
 
     def task_1(self):
-        forest = self.input
-        print(self.array_to_string(forest))
-        print()
-        visibility = self.visible(forest)
-        # print(self.array_to_string(visibility.astype(int)))
-        print()
-        self.print_visibility(forest, visibility)
-        return np.sum(visibility.astype(int))
+        # forest = self.input
+        # print(self.array_to_string(forest))
+        # print()
+        # visibility = self.visible(forest)
+        # # print(self.array_to_string(visibility.astype(int)))
+        # print()
+        # self.print_visibility(forest, visibility)
+        # return np.sum(visibility.astype(int))
+        return marek.visible_trees(self.input)
 
     def task_2(self):
         return NotImplemented
@@ -64,7 +68,7 @@ class Solver(Wrapper):
 part = 1
 solve_example = True
 solve_example = False
-example_solutions = [(21, 268912), None]
+example_solutions = [(21, 1803), None]
 
 solver = Solver(
     day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions
