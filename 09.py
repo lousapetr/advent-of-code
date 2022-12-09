@@ -64,7 +64,6 @@ class Solver(Wrapper):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.parser = self.parse_to_list
-        self.input = super().load_input()
 
     def task(self, tail_length: int) -> int:
         rope = Rope(tail_length=tail_length)
@@ -82,8 +81,8 @@ class Solver(Wrapper):
 
 part = 2
 solve_example = True
-solve_example = False
-example_solutions = [13, 1]
+# solve_example = False
+example_solutions = [13, (1, 36)]
 
 solver = Solver(
     day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions
