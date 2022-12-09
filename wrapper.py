@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from typing import Sequence, List, Any, Callable, Optional, Union
+from typing import Sequence, List, Any, Callable, Optional, Union, Tuple
 import sys
 import os
 import time
@@ -23,7 +23,10 @@ class HiddenPrints:
 
 class Wrapper(ABC):
     def __init__(
-        self, day: int, example: bool, example_solutions: Sequence[Union[int, str]]
+        self,
+        day: int,
+        example: bool,
+        example_solutions: Sequence[Union[int, str, Sequence[Union[int, str]]]],
     ):
         """
         Parameters
@@ -33,37 +36,35 @@ class Wrapper(ABC):
         example : bool
             True if using example input
             False if using real task input
-        example_solutions: List[int]
-            2-element list containing correct solutions for example of Part 1 and Part 2
-            initially (before solving Part 1), second element is None
+        example_solutions:
+            - 2-element list containing correct solutions for example of Part 1 and Part 2
+            - initially (before solving Part 1), second element is None
+            - if there are multiple example inputs, each element might be a list or tuple
         """
         self.day = day
         self.example = example
         self.example_solutions = example_solutions
         self.input_path = f"./inputs/{self.day:02d}_input.txt"
-        self.example_path = f"./inputs/{self.day:02d}_input_example.txt"
-        self.input = None
+        self.example_path_template = f"./inputs/{self.day:02d}_input_example{{}}.txt"
+        self.input: Any = None
         self.parser: Callable = self.parse_custom
+        self.parser_kwargs = None
 
-    def load_input(self, **kwargs) -> Any:
-        """Wrapper for various parsers, selects appropriate path according to `self.example`
-
-        Returns
-        -------
-        Any
-            anything according to specified parser
+    def load_input(self, path: str) -> None:
         """
-        if self.example:
-            path = self.example_path
+        Loads input using specified parser and saves it into an internal variable.
+        """
+        if self.parser_kwargs:
+            self.input = self.parser(path, **self.parser_kwargs)
         else:
-            path = self.input_path
-        return self.parser(path, **kwargs)
+            self.input = self.parser(path)
 
     def print_input(self):
         """Pretty print the parsed input"""
         print("=" * 15)
         print("Input:")
         pprint.pprint(self.input)
+        print()
 
     def parse_to_list(self, path: str, comment: str = "#") -> List[str]:
         """Parse input file to list of lines
@@ -170,6 +171,24 @@ class Wrapper(ABC):
                 f"Incorrect task number - {task_number}. Must equal to 1 or 2."
             )
 
+        if self.example:
+            self.solve_examples(task_func, task_number, verbose)
+        else:
+            self.load_input(self.input_path)
+            if verbose:
+                self.print_input()
+            result, run_time = self.run_task(task_func, verbose)
+            print(f"Elapsed time: {run_time * 1000:{time_fmt}} ms")
+            print("Result:", result)
+        print("=" * 15)
+
+    def run_task(self, task_func: Callable, verbose: bool) -> Tuple[Any, float]:
+        """
+        Wrapper method that runs a task and returns the result with elapsed time.
+
+        :return: result of task, time spent with calculation
+        :rtype: Tuple[Any, float]
+        """
         if verbose:
             start_time = time.perf_counter()
             result = task_func()
@@ -179,17 +198,33 @@ class Wrapper(ABC):
                 start_time = time.perf_counter()
                 result = task_func()
                 end_time = time.perf_counter()
+        return result, end_time - start_time
 
-        time_ms = (end_time - start_time) * 1000
-        print(f"Elapsed time: {time_ms:{time_fmt}} ms")
-        if self.example:
-            example_solution = self.example_solutions[task_number - 1]
-            if result != example_solution:
+    def solve_examples(self, task_func: Callable, task_number: int, verbose: bool):
+        """
+        Solve for example inputs and compares to expected results.
+        Allows multiple input files.
+        """
+        solution = self.example_solutions[task_number - 1]
+        if type(solution) in (int, str):
+            solution = [solution]
+        solution = list(solution)  # type: ignore
+        path_extensions = [""] + [f"_{i}" for i in range(1, len(solution))]
+        example_input_paths = [
+            self.example_path_template.format(ext) for ext in path_extensions
+        ]
+        for sol, path in zip(solution, example_input_paths):
+            self.load_input(path)
+            self.print_input()
+            result, run_time = self.run_task(task_func, verbose)
+            print(f"Elapsed time: {run_time * 1000:,.1f} ms")
+            if result != sol:
                 print("Incorrect solution!")
-                print(f"Should get:  {example_solution}")
+                print(f"Should get:  {sol}")
                 print(f"Got instead: {result}")
-                quit()
-        print("Result:", result)
+            else:
+                print("Correct solution!")
+                print("Result:", result)
 
     @abstractmethod
     def task_1(self) -> Union[int, str]:
