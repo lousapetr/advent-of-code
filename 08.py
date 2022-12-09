@@ -1,6 +1,7 @@
 from wrapper import Wrapper
-from typing import List, Tuple, Set, Dict  # noqa: F401
+from typing import List, Tuple, Set, Dict, Sequence  # noqa: F401
 import numpy as np
+from numpy.typing import NDArray
 
 marek = __import__("08_marek")
 MAREK_DEBUG = False
@@ -13,6 +14,7 @@ DAY_NUMBER = 8
 class Solver(Wrapper):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.verbose = False
         if MAREK_DEBUG:
             self.parser = self.parse_to_list
         else:
@@ -53,6 +55,50 @@ class Solver(Wrapper):
         pretty_forest = visible_forest_str.replace("0", ".")
         print(pretty_forest)
 
+    @staticmethod
+    def sight_lines(
+        forest: NDArray[np.int_], row: int, col: int
+    ) -> Sequence[NDArray[np.int_]]:
+        right = forest[row, (col + 1) :]
+        left = forest[row, (col - 1) :: -1]
+        up = forest[(row - 1) :: -1, col]
+        down = forest[(row + 1) :, col]
+        return right, left, up, down
+
+    def sight_range(self, height: int, line: NDArray[np.int_]) -> int:
+        if line.size == 0:
+            return 0
+        visible_line = height > line
+        if self.verbose:
+            print(visible_line)
+        if np.all(visible_line):
+            return len(visible_line)
+        return int(visible_line.argmin() + 1)  # find index of first False
+
+    def scenic_score(self, forest: NDArray[np.int_], row: int, col: int) -> int:
+        if row == 0 or col == 0:
+            return 0
+        tree_height = forest[row, col]
+        score = 1
+        for line in self.sight_lines(forest, row, col):
+            sight = self.sight_range(tree_height, line)
+            score *= sight
+            if self.verbose:
+                print(score, line, sight)
+        return score
+
+    def best_scenic_score(self, forest: NDArray[np.int_]) -> int:
+        best_score = 0
+        for row_idx, row in enumerate(forest):
+            for col_idx, tree in enumerate(row):
+                # if (row_idx, col_idx) == (2, 0):
+                # self.verbose = True
+                score = self.scenic_score(forest, row_idx, col_idx)
+                if score > best_score:
+                    best_score = score
+                self.verbose = False
+        return best_score
+
     def task_1(self):
         if MAREK_DEBUG:
             return marek.visible_trees(self.input)
@@ -66,13 +112,16 @@ class Solver(Wrapper):
         return np.sum(visibility.astype(int))
 
     def task_2(self):
-        return NotImplemented
+        return self.best_scenic_score(forest=self.input)
 
 
 part = 2
 solve_example = True
-# solve_example = False
-example_solutions = [(21, 1803, 1837), (8, 268912)]
+solve_example = False
+example_solutions = [
+    (21, 1803, 1837),
+    (8, 268912),
+]
 
 solver = Solver(
     day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions
