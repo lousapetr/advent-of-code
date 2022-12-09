@@ -69,10 +69,10 @@ class Solver(Wrapper):
         return NotImplemented
 
 
-part = 1
+part = 2
 solve_example = True
 # solve_example = False
-example_solutions = [(21, 1803, 1837), None]
+example_solutions = [(21, 1803, 1837), (8, 268912)]
 
 solver = Solver(
     day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions
