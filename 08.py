@@ -11,7 +11,6 @@ class Solver(Wrapper):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.parser = self.parse_to_array
-        self.input = super().load_input()
 
     @staticmethod
     def find_visible_from_north(forest: np.ndarray) -> np.ndarray:
@@ -65,7 +64,7 @@ class Solver(Wrapper):
 part = 1
 solve_example = True
 solve_example = False
-example_solutions = [21, None]
+example_solutions = [(21, 268912), None]
 
 solver = Solver(
     day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions
