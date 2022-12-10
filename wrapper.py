@@ -206,7 +206,7 @@ class Wrapper(ABC):
         Allows multiple input files.
         """
         solution = self.example_solutions[task_number - 1]
-        if type(solution) in (int, str):
+        if type(solution) in (int, str) or solution is None:
             solution = [solution]
         solution = list(solution)  # type: ignore
         path_extensions = [""] + [f"_{i}" for i in range(1, len(solution))]
