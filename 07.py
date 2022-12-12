@@ -1,9 +1,79 @@
+from __future__ import annotations
 from wrapper import Wrapper
-from typing import List, Tuple, Set, Dict  # noqa: F401
+from typing import List, Tuple, Set, Dict, Union, Optional  # noqa: F401
+from abc import ABC, abstractproperty
 
 # https://adventofcode.com/2022/day/7
 
 DAY_NUMBER = 7
+
+
+class Node(ABC):
+    def __init__(self, name: str) -> None:
+        self._size = None
+        self._name = name
+        self._parent = None
+
+    @abstractproperty
+    def size(self):
+        pass
+
+    @property
+    def parent(self) -> Directory:
+        if self._parent:
+            return self._parent
+        else:
+            return Directory("None")
+
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}("{self._name}")'
+
+
+class File(Node):
+    def __init__(self, name: str) -> None:
+        super().__init__(name)
+
+    @property
+    def size(self) -> int:
+        return self._size
+
+    @size.setter
+    def size(self, value: int):
+        self._size = value
+
+    @property
+    def parent(self) -> Directory:
+        return super().parent
+
+    @parent.setter
+    def parent(self, parent: Directory):
+        self._parent = parent
+        parent.add_child(self)
+
+
+class Directory(Node):
+    def __init__(self, name: str) -> None:
+        super().__init__(name)
+        self._parent = None
+        self.children: List[Union[File, Directory]] = []
+
+    @property
+    def size(self) -> int:
+        if self._size:
+            return self._size
+        return sum(child.size for child in self.children)
+
+    @property
+    def parent(self) -> Directory:
+        return super().parent
+
+    @parent.setter
+    def parent(self, parent: Directory):
+        self._parent = parent
+        parent.add_child(self)
+
+    def add_child(self, child: Union[Directory, File]):
+        self.children.append(child)
 
 
 class Solver(Wrapper):
@@ -12,12 +82,41 @@ class Solver(Wrapper):
         self.parser = self.parse_custom
 
     def parse_custom(self, path):
+        root = Directory("root")
+        current_dir = root
+        all_directories = [root]
         with open(path) as f:
             for line in f:
-                pass
+                line = line.strip().split()
+                if line[0] == "$":  # command
+                    if line[1] == "ls":
+                        continue
+                    if line[1] == "cd":
+                        if line[2] == "..":
+                            current_dir = current_dir.parent
+                            continue
+                        else:
+                            new_dir = Directory(line[2])
+                            new_dir.parent = current_dir
+                            current_dir = new_dir
+                            all_directories.append(new_dir)
+                            continue
+                elif line[0] == "dir":
+                    continue
+                else:
+                    new_file = File(line[-1])
+                    new_file.size = int(line[0])
+                    new_file.parent = current_dir
+        return all_directories
 
     def task_1(self):
-        return NotImplemented
+        sizes = [d.size for d in self.input]
+        small_dirs = filter(lambda x: x < 100_000, sizes)
+        # file_sizes = [
+        #     [(child._name, child.size) for child in d.children] for d in self.input
+        # ]
+        # print(file_sizes)
+        return sum(small_dirs)
 
     def task_2(self):
         return NotImplemented
@@ -25,7 +124,7 @@ class Solver(Wrapper):
 
 part = 1
 solve_example = True
-# solve_example = False
+solve_example = False
 example_solutions = [95437, None]
 
 solver = Solver(
