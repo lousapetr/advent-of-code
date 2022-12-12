@@ -119,13 +119,23 @@ class Solver(Wrapper):
         return sum(small_dirs)
 
     def task_2(self):
-        return NotImplemented
+        sizes = [d.size for d in self.input]
+        total_disk = 70_000_000
+        required_space = 30_000_000
+        root_size = [d.size for d in self.input if d._name == "/"][0]
+        currently_free_space = total_disk - root_size
+        to_delete = required_space - currently_free_space
+        # print(f"{root_size=}")
+        # print(f"{currently_free_space=}")
+        # print(f"{to_delete=}")
+        big_enough = [s for s in sizes if s >= to_delete]
+        return min(big_enough)
 
 
-part = 1
+part = 2
 solve_example = True
 solve_example = False
-example_solutions = [95437, None]
+example_solutions = [95437, 24933642]
 
 solver = Solver(
     day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions
