@@ -1,2 +1,4 @@
 pandas>=1.5
 numpy>=1.23
+
+ipython>=7.12
