@@ -1,4 +1,6 @@
 pandas>=1.5
 numpy>=1.23
 
+igraph==0.10
+
 ipython>=7.12
