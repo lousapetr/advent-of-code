@@ -11,7 +11,7 @@ DAY_NUMBER = 12
 class Solver(Wrapper):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.parser = self.parse2graph
+        self.parser = self.parse2map
 
     def idx2pos(self, idx: int) -> Tuple[int, int]:
         row = idx // self.ncols
@@ -29,13 +29,17 @@ class Solver(Wrapper):
         right = r, min(c+1, self.ncols - 1)
         return tuple(set([up, down, left, right]) - set([pos]))
 
-    def parse2graph(self, path: str) -> Tuple[List[Tuple[int]], int, int]:
+    def parse2map(self, path: str) -> List[str]:
         rows = self.parse_to_list(path)
         self.nrows = len(rows)
         self.ncols = len(rows[0])
+        return rows
+
+    def map2graph(self, heightmap: List[str]) -> Tuple[List[Tuple[int]], int, int]:
         edges = []
         start_idx, end_idx = -1, -1
-        for i_row, row in enumerate(rows):
+        # print(f'{self.nrows=} {self.ncols=}')
+        for i_row, row in enumerate(heightmap):
             for i_col, height in enumerate(row):
                 pos = (i_row, i_col)
                 idx = self.pos2idx(pos)
@@ -45,23 +49,32 @@ class Solver(Wrapper):
                 elif height == 'E':
                     height = 'z'
                     end_idx = idx
+                # print(f'{i_row=} {i_col=}')
                 for neigh_pos in self.neighbors(pos):
-                    h_dest = rows[neigh_pos[0]][neigh_pos[1]]
+                    h_dest = heightmap[neigh_pos[0]][neigh_pos[1]]
+                    if h_dest == 'E':
+                        h_dest = 'z'
                     if ord(h_dest) <= ord(height) + 1:
                         edges.append((idx, self.pos2idx(neigh_pos)))
         return edges, start_idx, end_idx
 
     def task_1(self):
-        edges, start_idx, end_idx = self.input
+        heightmap = self.input
+        # print(f'{len(heightmap)=} {len(heightmap[0])=}')
+        heightmap_flat = ''.join(heightmap)
+        edges, start_idx, end_idx = self.map2graph(heightmap)
+        print(f'{start_idx=} {end_idx=}')
         G = Graph(
             n=(self.nrows * self.ncols),
             edges=edges,
             directed=True
             )
-        shortest_path = G.get_all_shortest_paths(v=start_idx, to=end_idx)
-        pprint([[self.idx2pos(i) for i in p] for p in shortest_path])
+        shortest_path = G.get_k_shortest_paths(v=start_idx, to=end_idx, k=1)
+        # pprint([[self.idx2pos(i) for i in p] for p in shortest_path])
+        # pprint([''.join(heightmap_flat[i] for i in p) for p in shortest_path])
+        # pprint([''.join(f'{p}') for p in shortest_path])
 
-        return len(shortest_path[0])
+        return len(shortest_path[0]) - 1
 
     def task_2(self):
         return NotImplemented
@@ -69,7 +82,7 @@ class Solver(Wrapper):
 
 part = 1
 solve_example = True
-# solve_example = False
+solve_example = False
 example_solutions = [31, None]
 
 solver = Solver(
