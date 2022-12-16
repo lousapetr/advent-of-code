@@ -35,7 +35,7 @@ class Solver(Wrapper):
         self.ncols = len(rows[0])
         return rows
 
-    def map2graph(self, heightmap: List[str]) -> Tuple[List[Tuple[int]], int, int]:
+    def map2graph(self, heightmap: List[str]) -> Tuple[List[Tuple[int, int]], int, int]:
         edges = []
         start_idx, end_idx = -1, -1
         # print(f'{self.nrows=} {self.ncols=}')
@@ -77,13 +77,29 @@ class Solver(Wrapper):
         return len(shortest_path[0]) - 1
 
     def task_2(self):
-        return NotImplemented
+        heightmap = self.input
+        heightmap_flat = ''.join(heightmap)
+        edges, start_idx, end_idx = self.map2graph(heightmap)
+        back_edges = [(e[1], e[0]) for e in edges]
+        print(f'{start_idx=} {end_idx=}')
+        pprint([e for e in back_edges if e[0] == end_idx])
+        G = Graph(
+            n=(self.nrows * self.ncols),
+            edges=back_edges,
+            directed=True
+            )
+        lowlands = [i for i, h in enumerate(heightmap_flat) if h == 'a']
+        print(lowlands)
+        shortest_paths = G.get_shortest_paths(v=end_idx, to=lowlands)
+        shortest_existing_paths = [p for p in shortest_paths if p]
+        pprint(sorted(shortest_existing_paths, key=len)[:3])
+        return min(map(len, shortest_existing_paths)) - 1
 
 
-part = 1
+part = 2
 solve_example = True
 solve_example = False
-example_solutions = [31, None]
+example_solutions = [31, 29]
 
 solver = Solver(
     day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions
@@ -92,4 +108,4 @@ if solve_example:
     solver.print_input()
 solver.solve_task(1)
 if part > 1:
-    solver.solve_task(2)
+    solver.solve_task(2, verbose=True)
