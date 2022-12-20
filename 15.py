@@ -41,10 +41,7 @@ class Rectangle:
         return hash((self.left_x, self.right_x, self.top_y, self.bottom_y))
 
     def contains(self, corner: Tuple[int, int]) -> bool:
-        return (
-            (self.left_x <= corner[0] <= self.right_x)
-            and (self.bottom_y >= corner[1] >= self.top_y)
-        )
+        return (self.left_x <= corner[0] <= self.right_x) and (self.bottom_y >= corner[1] >= self.top_y)
 
     def cut(self, other: Rectangle) -> Set[Rectangle]:
         """
@@ -63,12 +60,14 @@ class Rectangle:
         _srt = (_sr, _st)
         _slb = (_sl, _sb)
         _srb = (_sr, _sb)
-        if all([  # self is completely covered by other
-            other.contains(_slt),
-            other.contains(_srt),
-            other.contains(_slb),
-            other.contains(_srb)
-        ]):
+        if all(
+            [  # self is completely covered by other
+                other.contains(_slt),
+                other.contains(_srt),
+                other.contains(_slb),
+                other.contains(_srb),
+            ]
+        ):
             return set()
         if other.contains(_slt) and other.contains(_srt):  # other covers top half of self
             return {Rectangle(_sl, _sr, _ob + 1, _sb)}
@@ -106,15 +105,15 @@ class Solver(Wrapper):
         self.parser = self.parse_custom
 
     @staticmethod
-    def get_sensors_beacons(lines: List[str]) -> List[Tuple[int, int, int,int]]:
+    def get_sensors_beacons(lines: List[str]) -> List[Tuple[int, int, int, int]]:
         output = []
-        number = re.compile(r'=([-0-9]*)')
+        number = re.compile(r"=([-0-9]*)")
         for line in lines:
             sensor = re.findall(number, line)
             output.append(tuple(int(num) for num in sensor))
         return output
 
-    def parse_custom(self, path) -> List[Tuple[int, int, int,int]]:
+    def parse_custom(self, path) -> List[Tuple[int, int, int, int]]:
         lines = self.parse_to_list(path)
         return self.get_sensors_beacons(lines)
 
@@ -163,7 +162,7 @@ class Solver(Wrapper):
 
     @staticmethod
     def rotate_forward(x: int, y: int) -> Tuple[int, int]:
-        return (x+y, x-y)
+        return (x + y, x - y)
 
     @staticmethod
     def rotate_backward(x: int, y: int) -> Tuple[int, int]:
@@ -176,7 +175,7 @@ class Solver(Wrapper):
             "left": (sensor_x, sensor_y - beacon_dist),
             "right": (sensor_x, sensor_y + beacon_dist),
             "top": (sensor_x - beacon_dist, sensor_y),
-            "bottom": (sensor_x + beacon_dist, sensor_y)
+            "bottom": (sensor_x + beacon_dist, sensor_y),
         }
         corners_rotated = [self.rotate_forward(c[0], c[1]) for c in corners_diamond.values()]
         left = min(c[0] for c in corners_rotated)
@@ -220,9 +219,7 @@ solve_example = True
 solve_example = False
 example_solutions = [26, 56000011]
 
-solver = Solver(
-    day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions
-)
+solver = Solver(day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions)
 if solve_example:
     solver.print_input()
 solver.solve_task(1)

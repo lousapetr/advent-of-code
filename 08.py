@@ -56,9 +56,7 @@ class Solver(Wrapper):
         print(pretty_forest)
 
     @staticmethod
-    def sight_lines(
-        forest: NDArray[np.int_], row: int, col: int
-    ) -> Sequence[NDArray[np.int_]]:
+    def sight_lines(forest: NDArray[np.int_], row: int, col: int) -> Sequence[NDArray[np.int_]]:
         right = forest[row, (col + 1) :]
         left = forest[row, (col - 1) :: -1]
         up = forest[(row - 1) :: -1, col]
@@ -123,9 +121,7 @@ example_solutions = [
     (8, 268912),
 ]
 
-solver = Solver(
-    day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions
-)
+solver = Solver(day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions)
 if solve_example:
     solver.print_input()
 solver.solve_task(1)

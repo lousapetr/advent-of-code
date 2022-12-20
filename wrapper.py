@@ -126,19 +126,13 @@ class Wrapper(ABC):
     def parse_custom(self):
         pass
 
-    def array_to_string(
-        self, matrix: np.ndarray, format: str = "1d", delimiter: str = ""
-    ) -> str:
+    def array_to_string(self, matrix: np.ndarray, format: str = "1d", delimiter: str = "") -> str:
         """
         Create string representation of numpy matrix
         """
-        return "\n".join(
-            f"{delimiter}".join(f"{num:{format}}" for num in row) for row in matrix
-        )
+        return "\n".join(f"{delimiter}".join(f"{num:{format}}" for num in row) for row in matrix)
 
-    def solve_task(
-        self, task_number: int, verbose: Optional[bool] = None, time_fmt: str = ",.1f"
-    ):
+    def solve_task(self, task_number: int, verbose: Optional[bool] = None, time_fmt: str = ",.1f"):
         """Wrapper for solving tasks
 
         - selects appropriate function to run
@@ -167,9 +161,7 @@ class Wrapper(ABC):
         elif task_number == 2:
             task_func = self.task_2
         else:
-            raise ValueError(
-                f"Incorrect task number - {task_number}. Must equal to 1 or 2."
-            )
+            raise ValueError(f"Incorrect task number - {task_number}. Must equal to 1 or 2.")
 
         if self.example:
             self.solve_examples(task_func, task_number, verbose)
@@ -210,9 +202,7 @@ class Wrapper(ABC):
             solution = [solution]
         solution = list(solution)  # type: ignore
         path_extensions = [""] + [f"_{i}" for i in range(1, len(solution))]
-        example_input_paths = [
-            self.example_path_template.format(ext) for ext in path_extensions
-        ]
+        example_input_paths = [self.example_path_template.format(ext) for ext in path_extensions]
         for sol, path in zip(solution, example_input_paths):
             self.load_input(path)
             self.print_input()

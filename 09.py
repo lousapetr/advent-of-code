@@ -84,9 +84,7 @@ solve_example = True
 # solve_example = False
 example_solutions = [13, (1, 36)]
 
-solver = Solver(
-    day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions
-)
+solver = Solver(day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions)
 if solve_example:
     solver.print_input()
 solver.solve_task(1)

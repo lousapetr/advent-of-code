@@ -10,15 +10,11 @@ DAY_NUMBER = 11
 
 
 class MonkeyTroop:
-    def __init__(
-        self, monkey_blocks: List[List[str]], worry_modifier: Callable
-    ) -> None:
+    def __init__(self, monkey_blocks: List[List[str]], worry_modifier: Callable) -> None:
         self.monkey_list = [Monkey(block, worry_modifier) for block in monkey_blocks]
         self.monkeys = {monkey.number: monkey for monkey in self.monkey_list}
 
-        tests_gcd = reduce(
-            lambda x, y: x * y, (m.test_divisor for m in self.monkey_list)
-        )
+        tests_gcd = reduce(lambda x, y: x * y, (m.test_divisor for m in self.monkey_list))
         print(f"{tests_gcd=}")
         for m in self.monkey_list:
             m.set_worry_divisor(tests_gcd)
@@ -28,16 +24,12 @@ class MonkeyTroop:
             monkey.take_turn(self.monkeys)
 
     def get_monkey_business(self) -> int:
-        most_active_monkeys = sorted(
-            (m.inspection_counter for m in self.monkey_list), reverse=True
-        )
+        most_active_monkeys = sorted((m.inspection_counter for m in self.monkey_list), reverse=True)
         return most_active_monkeys[0] * most_active_monkeys[1]
 
     def print_inspection_counters(self):
         for monkey in self.monkey_list:
-            print(
-                f"Monkey {monkey.number} inspected items {monkey.inspection_counter:5,d} times."
-            )
+            print(f"Monkey {monkey.number} inspected items {monkey.inspection_counter:5,d} times.")
 
 
 class Monkey:
@@ -80,7 +72,7 @@ class Monkey:
 
     @staticmethod
     def _power(old: int, power: int) -> int:
-        return old ** power
+        return old**power
 
     def take_turn(self, monkey_dict: Dict[str, Monkey]):
         # print(f"Monkey {self.number}:")
@@ -128,15 +120,11 @@ class Solver(Wrapper):
         return monkey_blocks
 
     def task_1(self):
-        monkey_troop = MonkeyTroop(
-            monkey_blocks=self.input, worry_modifier=lambda x: x // 3
-        )
+        monkey_troop = MonkeyTroop(monkey_blocks=self.input, worry_modifier=lambda x: x // 3)
         for _ in range(20):
             monkey_troop.take_round()
         for monkey in monkey_troop.monkey_list:
-            print(
-                f"Monkey {monkey.number} inspected items {monkey.inspection_counter:4d} times."
-            )
+            print(f"Monkey {monkey.number} inspected items {monkey.inspection_counter:4d} times.")
         return monkey_troop.get_monkey_business()
 
     def task_2(self):
@@ -158,9 +146,7 @@ solve_example = True
 solve_example = False
 example_solutions = [10605, 2713310158]
 
-solver = Solver(
-    day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions
-)
+solver = Solver(day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions)
 if solve_example:
     solver.print_input()
 solver.solve_task(1)

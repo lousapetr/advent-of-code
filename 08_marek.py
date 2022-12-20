@@ -1,14 +1,13 @@
 import numpy as np
 
 
-
 def visible_trees(l: list) -> int:
     """
- # read the input into a list
-file = open("Day-8/input.txt", "r")
-L = file.read().splitlines()
+     # read the input into a list
+    file = open("Day-8/input.txt", "r")
+    L = file.read().splitlines()
 
-   Finds how many trees are visible = have only shorter trees prior in their col or row from some side.
+       Finds how many trees are visible = have only shorter trees prior in their col or row from some side.
     """
 
     # parse input
@@ -60,10 +59,7 @@ L = file.read().splitlines()
                 threshold = input_array[i, j]
 
     # put together
-    result = (
-        (visible_from_left + visible_from_right + visible_from_top + visible_from_bot)
-        > 0
-    ).sum()
+    result = ((visible_from_left + visible_from_right + visible_from_top + visible_from_bot) > 0).sum()
 
     return result
 

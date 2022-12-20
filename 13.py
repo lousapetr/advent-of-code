@@ -58,7 +58,6 @@ class Solver(Wrapper):
         else:
             return 0
 
-
     def task_1(self):
         correct_order = []
         for i, (left, right) in enumerate(self.input):
@@ -68,7 +67,7 @@ class Solver(Wrapper):
             # print()
             if self.compare(left, right) == -1:
                 correct_order.append(i + 1)
-        print(f'{correct_order=}')
+        print(f"{correct_order=}")
         return sum(correct_order)
 
     def task_2(self):
@@ -77,7 +76,7 @@ class Solver(Wrapper):
         ordered = sorted(packets + dividers, key=cmp_to_key(self.compare))
         pprint(ordered)
         indices = [(d, ordered.index(d) + 1) for d in dividers]
-        print(f'{indices=}')
+        print(f"{indices=}")
         decoder_key = indices[0][1] * indices[1][1]
         return decoder_key
 
@@ -87,9 +86,7 @@ solve_example = True
 solve_example = False
 example_solutions = [13, 140]
 
-solver = Solver(
-    day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions
-)
+solver = Solver(day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions)
 if solve_example:
     solver.print_input()
 solver.solve_task(1)

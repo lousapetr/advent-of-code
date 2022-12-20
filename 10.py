@@ -47,13 +47,9 @@ class CPU:
             self.screen[crt_position] = "."
 
         if DEBUG and self.tick_current < 22:
-            print(
-                f"End of cycle {self.tick_current - 1}: (Register X is now {self.registers['X']})"
-            )
+            print(f"End of cycle {self.tick_current - 1}: (Register X is now {self.registers['X']})")
             print()
-            print(
-                f"During cycle {self.tick_current}: CRT draws pixel in position {crt_position}"
-            )
+            print(f"During cycle {self.tick_current}: CRT draws pixel in position {crt_position}")
             print(f"Current CRT row: {''.join(self.screen[:40])}")
 
         self.tick_current += 1
@@ -88,9 +84,7 @@ solve_example = True
 solve_example = False
 example_solutions = [13140, None]
 
-solver = Solver(
-    day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions
-)
+solver = Solver(day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions)
 if solve_example:
     solver.print_input()
 solver.solve_task(1)
