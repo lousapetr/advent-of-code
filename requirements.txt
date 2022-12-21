@@ -3,4 +3,7 @@ numpy>=1.23
 
 igraph==0.10
 
+# dev
 ipython>=7.12
+
+pre-commit>=2.20
