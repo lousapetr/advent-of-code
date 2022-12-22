@@ -1,6 +1,8 @@
-from wrapper import Wrapper
-from typing import List, Tuple, Set, Dict  # noqa: F401
+from typing import Dict, List, Set, Tuple  # noqa: F401
 
+from wrapper import Wrapper
+
+# $DAILY_TITLE
 # $DAILY_URL
 
 DAY_NUMBER = None

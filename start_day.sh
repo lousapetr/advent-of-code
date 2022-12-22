@@ -60,6 +60,8 @@ echo "================================"
 if [ -f "$INPUT_FILE" ]
 then
     echo "Solution file $INPUT_FILE already exists."
+    touch "$EXAMPLE_FILE"
+    echo "Solution file $EXAMPLE_FILE already exists."
 else
     echo "Downloading input from ${INPUT_URL}"
     curl --cookie "session=${TOKEN}" "$INPUT_URL" --output "$INPUT_FILE"
@@ -86,7 +88,9 @@ then
     exit
 else
     echo "Creating solution file ${CODE_FILE}"
+    DAILY_TITLE=$(curl -s "${DAILY_URL}" | grep -oP '(?<=<h2>).*(?=</h2>)')
     sed "s|\$DAILY_URL|${DAILY_URL}|" template.py \
+        | sed "s|\$DAILY_TITLE|${DAILY_TITLE}|" \
         | awk "/^DAY_NUMBER/{sub(\"None\", \"${DAY_NUMBER}\")} {print}" \
         > "$CODE_FILE"
 fi
