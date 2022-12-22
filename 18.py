@@ -1,5 +1,6 @@
+from typing import Dict, List, Set, Tuple  # noqa: F401
+
 from wrapper import Wrapper
-from typing import List, Tuple, Set, Dict  # noqa: F401
 
 # https://adventofcode.com/2022/day/18
 
@@ -38,7 +39,15 @@ class Solver(Wrapper):
         return exposed_sides
 
     def task_2(self):
-        return NotImplemented
+        cubes = set(self.input)
+        neigbors = []
+        for cube in cubes:
+            neigbors.append(list(self.neighbors_set(cube)))
+        # 1. add second layer of neighbors
+        # 2. create graph of "water" cubes - vertices are cubes, edges are touching sides
+        # 3. find connected components https://igraph.org/python/versions/latest/api/igraph.Graph.html#components
+        # 4. there *should* be a single large component on the true outside and smaller (multiple?) components inside
+        # 5. count all touching points between the large component and lava cubes
 
 
 part = 1
