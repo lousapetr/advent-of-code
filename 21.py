@@ -86,7 +86,7 @@ class Solver(Wrapper):
 
         # human side yields a polynom `real + imag * x`, monkey-only side yields number, solve equation for x
         human, desired = sorted(Monkey.monkey_instances["root"].value, key=lambda x: str(type))
-        return int((desired - human.real) / human.imag)
+        return int((desired - human.real) / human.imag) + 1
 
 
 part = 2

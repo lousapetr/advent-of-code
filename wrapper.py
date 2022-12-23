@@ -1,11 +1,12 @@
-import pandas as pd
-import numpy as np
-from typing import Sequence, List, Any, Callable, Optional, Union, Tuple
-import sys
 import os
-import time
 import pprint
+import sys
+import time
 from abc import ABC, abstractmethod
+from typing import Any, Callable, List, Optional, Sequence, Tuple, Union
+
+import numpy as np
+import pandas as pd
 
 
 class HiddenPrints:
@@ -19,6 +20,18 @@ class HiddenPrints:
     def __exit__(self, exc_type, exc_val, exc_tb):
         sys.stdout.close()
         sys.stdout = self._original_stdout
+
+
+class bcolors:
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
 
 
 class Wrapper(ABC):
@@ -171,7 +184,7 @@ class Wrapper(ABC):
                 self.print_input()
             result, run_time = self.run_task(task_func, verbose)
             print(f"Elapsed time: {run_time * 1000:{time_fmt}} ms")
-            print("Result:", result)
+            print(f"Result: {bcolors.BOLD}{bcolors.OKBLUE}{result}{bcolors.ENDC}")
         print("=" * 15)
 
     def run_task(self, task_func: Callable, verbose: bool) -> Tuple[Any, float]:
@@ -209,12 +222,12 @@ class Wrapper(ABC):
             result, run_time = self.run_task(task_func, verbose)
             print(f"Elapsed time: {run_time * 1000:,.1f} ms")
             if result != sol:
-                print("Incorrect solution!")
-                print(f"Should get:  {sol}")
-                print(f"Got instead: {result}")
+                print(f"{bcolors.BOLD}{bcolors.FAIL}Incorrect solution!{bcolors.ENDC}")
+                print(f"Should get:  {bcolors.OKBLUE}{sol}{bcolors.ENDC}")
+                print(f"Got instead: {bcolors.WARNING}{result}{bcolors.ENDC}")
             else:
-                print("Correct solution!")
-                print("Result:", result)
+                print(f"{bcolors.BOLD}{bcolors.OKGREEN}Correct solution!{bcolors.ENDC}")
+                print(f"Result: {bcolors.OKBLUE}{result}{bcolors.ENDC}")
 
     @abstractmethod
     def task_1(self) -> Union[int, str]:
