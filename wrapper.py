@@ -79,24 +79,29 @@ class Wrapper(ABC):
         pprint.pprint(self.input)
         print()
 
-    def parse_to_list(self, path: str, comment: str = "#") -> List[str]:
+    def parse_to_list(self, path: str, astype: Callable = str, comment: str = "#") -> List[Any]:
         """Parse input file to list of lines
 
         Parameters
         ----------
         path : str
             path to input file
+        astype: Callable
+            convert each line by given function
         comment : str, optional
             ignore lines starting by this character, by default '#'
 
         Returns
         -------
-        List[str]
-            list of lines as strings
+        List[Any]
+            list of lines as strings or converted to another type
         """
         with open(path) as f:
-            lines = f.readlines()
-            return [line.strip() for line in lines if not line.startswith(comment)]
+            lines = [line.strip() for line in f.readlines() if not line.startswith(comment)]
+        try:
+            return [astype(line) for line in lines]
+        except ValueError:
+            return lines
 
     def parse_to_pandas_df(self, path: str, **kwargs) -> pd.DataFrame:
         """Parse input file to pandas dataframe, can specify delimiter, header, names, dtype or other
