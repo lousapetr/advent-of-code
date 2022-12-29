@@ -39,21 +39,34 @@ class Solver(Wrapper):
         return exposed_sides
 
     def task_2(self):
-        cubes = set(self.input)
-        neigbors = []
-        for cube in cubes:
-            neigbors.append(list(self.neighbors_set(cube)))
-        # 1. add second layer of neighbors
-        # 2. create graph of "water" cubes - vertices are cubes, edges are touching sides
-        # 3. find connected components https://igraph.org/python/versions/latest/api/igraph.Graph.html#components
-        # 4. there *should* be a single large component on the true outside and smaller (multiple?) components inside
-        # 5. count all touching points between the large component and lava cubes
+        lava_cubes = set(self.input)
+        # 1. create all "outside" air cells starting from far away by going through neighbors
+        x_min, x_max = min(c[0] for c in lava_cubes) - 2, max(c[0] for c in lava_cubes) + 2
+        y_min, y_max = min(c[1] for c in lava_cubes) - 2, max(c[1] for c in lava_cubes) + 2
+        z_min, z_max = min(c[2] for c in lava_cubes) - 2, max(c[2] for c in lava_cubes) + 2
+        outside: Set[CubeType] = set()
+        to_visit = set([(x_min, y_min, z_min)])
+        while to_visit:
+            cube = to_visit.pop()
+            if cube[0] in range(x_min, x_max) and cube[1] in range(y_min, y_max) and cube[2] in range(z_min, z_max):
+                outside.add(cube)
+                neighbors = self.neighbors_set(cube)
+                new_visits = neighbors - outside - lava_cubes
+                to_visit.update(new_visits)
+
+        # 2. calculate intersection between neighbors of lava cubes and outside cells
+        outside_surface = 0
+        for cube in lava_cubes:
+            neigbors = self.neighbors_set(cube)
+            outside_neighbors = neigbors.intersection(outside)
+            outside_surface += len(outside_neighbors)
+        return outside_surface
 
 
-part = 1
+part = 2
 solve_example = True
 solve_example = False
-example_solutions = [64, None]
+example_solutions = [64, 58]
 
 solver = Solver(day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions)
 if solve_example:
