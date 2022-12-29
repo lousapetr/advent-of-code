@@ -3,7 +3,9 @@ from __future__ import annotations
 import curses
 from collections import Counter
 from dataclasses import dataclass
-from typing import Dict, List, Set, Tuple  # noqa: F401
+from typing import Dict, List, Optional, Set, Tuple  # noqa: F401
+
+import pandas as pd
 
 from wrapper import Wrapper
 
@@ -54,6 +56,7 @@ class Solver(Wrapper):
         super().__init__(**kwargs)
         self.parser = self.parse_custom
         self.elf_positions: List[ElfPosition]
+        self.history: List[Dict[str, int]] = []
 
     def parse_custom(self, path) -> List[ElfPosition]:
         lines = self.parse_to_list(path, comment="-")
@@ -78,27 +81,45 @@ class Solver(Wrapper):
                 return move
         return elf  # if all directions are occupied
 
-    def round(self, proposal_directions: str) -> List[ElfPosition]:
+    def round(self, proposal_directions: str) -> Tuple[List[ElfPosition], int]:
         elf_positions = set(self.elf_positions)
         move_proposals = [self.propose_move(elf, elf_positions, proposal_directions) for elf in self.elf_positions]
         proposal_counter = Counter(move_proposals)
         new_elf_positions = []
-        for i, move in enumerate(move_proposals):
-            if proposal_counter[move] == 1:
+        moved_count = 0
+        for orig_pos, move in zip(self.elf_positions, move_proposals):
+            if proposal_counter[move] == 1 and move != orig_pos:
                 new_elf_positions.append(move)
+                moved_count += 1
             else:
-                new_elf_positions.append(self.elf_positions[i])
-        return new_elf_positions
+                new_elf_positions.append(orig_pos)
+        return new_elf_positions, moved_count
 
-    def spread(self, n_rounds: int):
+    def spread(self, n_rounds: Optional[int]):
         proposal_directions = "NSWE"
         if self.verbose:
             self.show_elves()
-        for i in range(n_rounds):
-            self.elf_positions = self.round(proposal_directions)
+        round_count = 0
+        self.history += [
+            {"round": round_count, "x": elf.col, "y": elf.row, "id": i} for i, elf in enumerate(self.elf_positions)
+        ]
+        while True:
+            round_count += 1
+            if n_rounds and round_count > n_rounds:
+                return self.empty_ground()
+            new_positions, moved_count = self.round(proposal_directions)
+            print(f"Round {round_count:3d}\t Moved elves: {moved_count:4d}", end="\t")
+            self.empty_ground()
+            self.history += [
+                {"round": round_count, "x": elf.col, "y": elf.row, "id": i} for i, elf in enumerate(new_positions)
+            ]
+            if new_positions != self.elf_positions:
+                self.elf_positions = new_positions
+            else:
+                return round_count
             proposal_directions = proposal_directions[1:] + proposal_directions[0]
             if self.verbose:
-                self.show_elves(round=(i + 1))
+                self.show_elves(round=(round_count + 1))
 
     def empty_ground(self) -> int:
         min_row = min(elf.row for elf in self.elf_positions)
@@ -106,6 +127,7 @@ class Solver(Wrapper):
         min_col = min(elf.col for elf in self.elf_positions)
         max_col = max(elf.col for elf in self.elf_positions)
         area = (max_row - min_row + 1) * (max_col - min_col + 1)
+        print(f"Covered area: rows ({min_row:4d}, {max_row:4d}), cols ({min_col:4d}, {max_col:4d})")
         return area - len(self.elf_positions)
 
     @staticmethod
@@ -119,8 +141,8 @@ class Solver(Wrapper):
             stdscr.addstr(0, 0, "== Initial state ==")
         else:
             stdscr.addstr(0, 0, f"== End of Round {round} ==")
-        for y in range(1, max_row + 5):
-            for x in range(1, max_col + 5):
+        for y in range(1, max_row - min_row + 5):
+            for x in range(1, max_col - min_col + 5):
                 elf_x, elf_y = x + min_col, y + min_row
                 if ElfPosition(row=elf_y, col=elf_x) in elf_positions:
                     stdscr.addch(y, x, "#")
@@ -137,23 +159,30 @@ class Solver(Wrapper):
 
     def task_1(self):
         self.elf_positions = self.input
-        self.verbose = self.example
-        self.spread(n_rounds=10)
-        return self.empty_ground()
+        # self.verbose = self.example
+        self.verbose = False
+        result = self.spread(n_rounds=10)
+        return result
 
     def task_2(self):
         self.elf_positions = self.input
-        return NotImplemented
+        # self.verbose = self.example
+        self.verbose = False
+        result = self.spread(n_rounds=None)
+        output_path = "inputs/23_output_example.csv" if self.example else "inputs/23_output.csv"
+        history_df = pd.DataFrame.from_records(self.history)
+        history_df.to_csv(output_path)
+        return result
 
 
-part = 1
+part = 2
 solve_example = True
 solve_example = False
-example_solutions = [110, None]
+example_solutions = [110, 20]
 
 solver = Solver(day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions)
 if solve_example:
     solver.print_input()
 solver.solve_task(1)
 if part > 1:
-    solver.solve_task(2)
+    solver.solve_task(2, verbose=True)
