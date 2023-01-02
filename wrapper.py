@@ -213,7 +213,7 @@ class Wrapper(ABC):
     def solve_examples(self, task_func: Callable, task_number: int, verbose: bool):
         """
         Solve for example inputs and compares to expected results.
-        Allows multiple input files.
+        Allows multiple input files named like `<N>_input_example.txt, <N>_input_example_1.txt,...`
         """
         solution = self.example_solutions[task_number - 1]
         if type(solution) in (int, str) or solution is None:
