@@ -24,6 +24,7 @@ class BlizzardBasin:
         self.right: MapType
         self.left: MapType
         self.parse_lines(lines)
+        self.time = 0
 
     def parse_lines(self, lines: List[str]):
         entry = lines[0].index(".") - 1
@@ -53,6 +54,44 @@ class BlizzardBasin:
         self.right = np.roll(self.right, 1, axis=1)
         self.left = np.roll(self.left, -1, axis=1)
 
+    def find_route_length(self) -> int:
+        while self.destination not in self.positions:
+            self.time += 1
+            # print(self.time)
+            # print(self.positions)
+            self.move_blizzards()
+            self.update_positions()
+        return self.time + 1
+
+    def update_positions(self):
+        new_positions = set()
+        blizzard_map = self.up + self.down + self.right + self.left
+        while self.positions:
+            pos = self.positions.pop()
+            if blizzard_map[pos] == 0 or pos in (
+                self.original_entry,
+                self.destination,
+            ):  # position is free of blizzards
+                new_positions.update(self.possible_moves(pos))
+        self.positions = new_positions
+
+    def is_inside_borders(self, position: PositionType) -> bool:
+        return (
+            (0 <= position[0] < self.up.shape[0] and 0 <= position[1] < self.up.shape[1])
+            or position == self.original_entry
+            or position == self.destination
+        )
+
+    def possible_moves(self, position: PositionType) -> Set[PositionType]:
+        moves = [
+            position,  # wait
+            (position[0] - 1, position[1]),  # up
+            (position[0] + 1, position[1]),  # down
+            (position[0], position[1] - 1),  # left
+            (position[0], position[1] + 1),  # right
+        ]
+        return {m for m in moves if self.is_inside_borders(m)}
+
     def __str__(self) -> str:
         rows = []
         upper_wall = "".join("." if i == self.original_entry[1] + 1 else "#" for i in range(self.up.shape[1] + 2))
@@ -75,8 +114,8 @@ class BlizzardBasin:
                         blizzard_map[i, j] = ">"
                     if self.left[i, j]:
                         blizzard_map[i, j] = "<"
-        rows = [upper_wall] + ["#" + "".join(row) + "#" for row in blizzard_map] + [bottom_wall]
-
+        title = f"After minute {self.time}:"
+        rows = [title, upper_wall] + ["#" + "".join(row) + "#" for row in blizzard_map] + [bottom_wall]
         return "\n".join(rows)
 
 
@@ -97,7 +136,7 @@ class Solver(Wrapper):
         #     print(blizzard_basin)
         #     blizzard_basin.move_blizzards()
         #     print()
-        return NotImplemented
+        return blizzard_basin.find_route_length()
 
     def task_2(self):
         return NotImplemented
@@ -108,8 +147,8 @@ solve_example = True
 # solve_example = False
 example_solutions = [
     (
-        10,
-        # 18,
+        11,
+        18,
     ),
     None,
 ]
