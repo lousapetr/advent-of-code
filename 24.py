@@ -29,7 +29,6 @@ class BlizzardBasin:
     def parse_lines(self, lines: List[str]):
         entry = lines[0].index(".") - 1
         self.original_entry = (-1, entry)
-        self.positions = {self.original_entry}
         destination = lines[-1].index(".") - 1
         self.destination = (len(lines) - 2, destination)
         row_count = len(lines) - 2
@@ -55,22 +54,29 @@ class BlizzardBasin:
         self.left = np.roll(self.left, -1, axis=1)
 
     def find_route_length(self) -> int:
+        self.positions = {self.original_entry}
         while self.destination not in self.positions:
             self.time += 1
             # print(self.time)
             # print(self.positions)
             self.move_blizzards()
             self.update_positions()
-        return self.time + 1
+        self.move_blizzards()
+        self.time += 1
+        return self.time
 
     def update_positions(self):
         new_positions = set()
         blizzard_map = self.up + self.down + self.right + self.left
         while self.positions:
             pos = self.positions.pop()
-            if blizzard_map[pos] == 0 or pos in (
-                self.original_entry,
-                self.destination,
+            if (
+                pos
+                in (
+                    self.original_entry,
+                    self.destination,
+                )
+                or blizzard_map[pos] == 0
             ):  # position is free of blizzards
                 new_positions.update(self.possible_moves(pos))
         self.positions = new_positions
@@ -139,18 +145,31 @@ class Solver(Wrapper):
         return blizzard_basin.find_route_length()
 
     def task_2(self):
-        return NotImplemented
+        blizzard_basin: BlizzardBasin = self.input
+        orig_start, orig_dest = blizzard_basin.original_entry, blizzard_basin.destination
+        steps_there = blizzard_basin.find_route_length()
+        print(f"{steps_there=}")
+        blizzard_basin.original_entry = orig_dest
+        blizzard_basin.destination = orig_start
+        steps_back = blizzard_basin.find_route_length()
+        print(f"{steps_back=}")
+        blizzard_basin.original_entry = orig_start
+        blizzard_basin.destination = orig_dest
+        steps_there_again = blizzard_basin.find_route_length()
+        print(f"{steps_there_again=}")
+        # return steps_there + steps_back + steps_there_again - 3
+        return blizzard_basin.time
 
 
-part = 1
+part = 2
 solve_example = True
-# solve_example = False
+solve_example = False
 example_solutions = [
     (
         11,
         18,
     ),
-    None,
+    (34, 54),
 ]
 
 solver = Solver(day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions)
