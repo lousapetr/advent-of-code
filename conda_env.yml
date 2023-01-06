@@ -1,0 +1,15 @@
+name: advent_of_code_2022
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - flake8
+  - python-dateutil
+  - black
+  - pre-commit
+  - python=3.11
+  - ipython
+  - pandas
+  - matplotlib
+  - igraph
+prefix: /home/lousapetr/miniconda3/envs/advent_of_code_2022
