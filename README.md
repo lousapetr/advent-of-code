@@ -2,4 +2,4 @@
 
 https://adventofcode.com/
 
-Get new AoC token from cookies - see https://github.com/wimglenn/advent-of-code-data#quickstart
+Get new AoC token from cookies - see https://github.com/wimglenn/advent-of-code-wim/issues/1

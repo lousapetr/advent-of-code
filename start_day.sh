@@ -73,6 +73,14 @@ else
         rm "$INPUT_FILE"
         exit 1
     fi
+    if grep -q -e "Please log in to get your puzzle input." "$INPUT_FILE"
+    then
+        echo "AOC session token invalid, see https://github.com/wimglenn/advent-of-code-wim/issues/1"
+        touch aoc_token.txt
+        echo "Put valid token into file aoc_token.txt"
+        rm "$INPUT_FILE"
+        exit 1
+    fi
 
     touch "$EXAMPLE_FILE"
     echo "Please fill the example file ${EXAMPLE_FILE}"
