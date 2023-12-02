@@ -1,5 +1,3 @@
-from typing import Dict, List, Set, Tuple  # noqa: F401
-
 from wrapper import Wrapper
 
 # $DAILY_TITLE

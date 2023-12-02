@@ -1,6 +1,6 @@
 #!/bin/bash
 
-YEAR=2022
+YEAR=2023
 
 # find your token like this https://github.com/wimglenn/advent-of-code-wim/issues/1
 # and save to file 'aoc_token.txt' - add it to .gitignore to not share
@@ -42,7 +42,7 @@ esac
 # Set paths
 echo "Day $DAY_NUMBER begins!"
 
-DAY_PAD=$(printf '%02s' $DAY_NUMBER)
+DAY_PAD=$(printf '%02d' $DAY_NUMBER)
 
 DAILY_URL="https://adventofcode.com/${YEAR}/day/${DAY_NUMBER}"
 INPUT_URL="${DAILY_URL}/input"
