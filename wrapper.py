@@ -3,10 +3,11 @@ import pprint
 import sys
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Callable, List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, List, Optional, Sequence, Tuple, Union
 
-import numpy as np
-import pandas as pd
+if TYPE_CHECKING:
+    import numpy as np
+    import pandas as pd
 
 
 class HiddenPrints:
@@ -103,7 +104,7 @@ class Wrapper(ABC):
         except ValueError:
             return lines
 
-    def parse_to_pandas_df(self, path: str, **kwargs) -> pd.DataFrame:
+    def parse_to_pandas_df(self, path: str, **kwargs) -> "pd.DataFrame":
         """Parse input file to pandas dataframe, can specify delimiter, header, names, dtype or other
 
         Parameters
@@ -116,6 +117,8 @@ class Wrapper(ABC):
         pd.DataFrame
             dataframe interpreting the input file as CSV
         """
+        import pandas as pd
+
         kwargs.setdefault("delimiter", " ")
         kwargs.setdefault("header", None)
         kwargs.setdefault("names", None)
@@ -124,7 +127,7 @@ class Wrapper(ABC):
         df = pd.concat(text_reader, ignore_index=True)
         return df
 
-    def parse_to_array(self, path: str) -> np.ndarray:
+    def parse_to_array(self, path: str) -> "np.ndarray":
         """Parse input file to numpy array, ignoring lines starting by `#`
 
         Parameters
@@ -137,6 +140,8 @@ class Wrapper(ABC):
         np.ndarray[int]
             numpy array of integers
         """
+        import numpy as np
+
         line_list = self.parse_to_list(path)
         matrix = [[int(i) for i in x] for x in line_list if x[0] != "#"]
         return np.array(matrix)
@@ -144,7 +149,7 @@ class Wrapper(ABC):
     def parse_custom(self):
         pass
 
-    def array_to_string(self, matrix: np.ndarray, format: str = "1d", delimiter: str = "") -> str:
+    def array_to_string(self, matrix: Sequence[Sequence[Any]], format: str = "1d", delimiter: str = "") -> str:
         """
         Create string representation of numpy matrix
         """
