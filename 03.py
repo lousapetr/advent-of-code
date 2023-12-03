@@ -8,6 +8,8 @@ from wrapper import Wrapper
 
 DAY_NUMBER = 3
 
+MatchType = tuple[int, Match[str]]
+
 
 class Solver(Wrapper):
     def __init__(self, **kwargs):
@@ -21,14 +23,14 @@ class Solver(Wrapper):
         bordered = [f".{line}." for line in bordered]
         return bordered
 
-    def find_numbers(self, plan: list[str]) -> list[tuple[int, Match[str]]]:
+    def find_items(self, plan: list[str], pattern: str) -> list[MatchType]:
         matches = []
         for n, line in enumerate(plan):
-            line_matches = re.finditer(r"\d+", line)
+            line_matches = re.finditer(pattern, line)
             matches += [(n, m) for m in line_matches]
         return matches
 
-    def neighborhood(self, match: tuple[int, Match[str]], plan: list[str]) -> str:
+    def neighborhood(self, match: MatchType, plan: list[str]) -> str:
         row = match[0]
         span = match[1].span()
         top = plan[row - 1][span[0] - 1 : span[1] + 1]
@@ -39,8 +41,7 @@ class Solver(Wrapper):
 
     def task_1(self):
         bordered = self.add_borders()
-        # print("\n".join(bordered))
-        matches = self.find_numbers(bordered)
+        matches = self.find_items(bordered, r"\d+")
         engine_parts = []
         for m in matches:
             if re.findall(r"[^0-9.]", n := self.neighborhood(m, bordered)):
@@ -49,14 +50,35 @@ class Solver(Wrapper):
         print(engine_parts)
         return sum(engine_parts)
 
+    def gear_numbers(self, gears: list[MatchType], numbers: list[MatchType]) -> list[tuple[int, int]]:
+        gear_ratios = []
+        for gear in gears:
+            gear_row, gear_col = gear[0], gear[1].start()
+            attached_numbers = []
+            for n_row, n_match in numbers:
+                if gear_row - 1 <= n_row <= gear_row + 1:
+                    if (gear_col <= n_match.end()) and (gear_col + 1 >= n_match.start()):
+                        # print(n_match)
+                        attached_numbers.append(int(n_match.group()))
+            # print(gear, attached_numbers)
+            if len(attached_numbers) == 2:
+                gear_ratios.append(attached_numbers)
+        return gear_ratios
+
     def task_2(self):
-        return NotImplemented
+        bordered = self.add_borders()
+        # print(self.array_to_string(bordered, format="s"))
+        numbers = self.find_items(bordered, r"\d+")
+        gears = self.find_items(bordered, r"\*")
+        gear_ratios = self.gear_numbers(gears, numbers)
+        # print(gear_ratios)
+        return sum([gr[0] * gr[1] for gr in gear_ratios])
 
 
-part = 1
+part = 2
 solve_example = True
 solve_example = False
-example_solutions = [4361, None]
+example_solutions = [4361, 467835]
 
 solver = Solver(day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions)
 if solve_example:
