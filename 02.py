@@ -45,13 +45,25 @@ class Solver(Wrapper):
         return sum(possible_games)
 
     def task_2(self):
-        return NotImplemented
+        powers = []
+        for game_id, draws in self.parse_input_lines():
+            minimum_set = Counter()
+            for d in draws:
+                minimum_set |= d
+            print(game_id)
+            print(minimum_set)
+            power = 1
+            for n in minimum_set.values():
+                power *= n
+            print(power)
+            powers.append(power)
+        return sum(powers)
 
 
-part = 1
+part = 2
 solve_example = True
 solve_example = False
-example_solutions = [8, None]
+example_solutions = [8, 2286]
 
 solver = Solver(day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions)
 if solve_example:
