@@ -12,23 +12,8 @@ repos:
       entry: poetry run isort
       language: system
       types: [file, python]
-
-# repos:
-#   - repo: https://github.com/floatingpurr/sync_with_poetry
-#     rev: 1.1.0 # the revision or tag to clone at
-#     hooks:
-#       - id: sync_with_poetry
-#         args: [] # optional args
-#   - repo: https://github.com/pycqa/isort
-#     rev: 5.11.3
-#     hooks:
-#       - id: isort
-#   - repo: https://github.com/psf/black
-#     rev: 22.10.0
-#     hooks:
-#     - id: black
-#       language_version: python3.10
-#   - repo: https://github.com/pycqa/flake8
-#     rev: 6.0.0
-#     hooks:
-#     - id: flake8
+    - id: flake8
+      name: flake8
+      entry: poetry run flake8
+      language: system
+      types: [file, python]

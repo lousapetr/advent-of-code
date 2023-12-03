@@ -1,5 +1,6 @@
-from wrapper import Wrapper
 import re
+
+from wrapper import Wrapper
 
 # --- Day 1: Trebuchet?! ---
 # https://adventofcode.com/2023/day/1
@@ -23,7 +24,7 @@ class Solver(Wrapper):
         number_names = number_names_raw.replace(",", "").split()
         # https://stackoverflow.com/a/5616910
         # finds all occurences, including overlaps
-        digits_raw =  re.findall(f"""(?=({"|".join(number_names) + "|[0-9]"}))""", string)
+        digits_raw = re.findall(f"""(?=({"|".join(number_names) + "|[0-9]"}))""", string)
         print(f"{digits_raw=}")
         digits = [d if d.isdigit() else str(number_names.index(d) + 1) for d in digits_raw]
         print(f"{digits=}")
