@@ -1,4 +1,5 @@
 import re
+from collections import Counter
 
 from wrapper import Wrapper
 
@@ -27,26 +28,38 @@ class Solver(Wrapper):
                 cards.append((card_id, winning_numbers, my_numbers))
         return cards
 
-    def task_1(self):
-        wins = []
+    def number_of_wins(self) -> dict[int, int]:
+        wins = {}
         for card in self.input:
             card_id, winning, my_nums = card
-            wins.append(winning & my_nums)
-            # print(card_id, winning & my_nums)
+            matches = winning & my_nums
+            wins[card_id] = len(matches)
+        return wins
+
+    def task_1(self):
         points = 0
-        for win in wins:
-            if win:
-                points += 2 ** (len(win) - 1)
+        for matches in self.number_of_wins().values():
+            if matches:
+                points += 2 ** (matches - 1)
         return points
 
     def task_2(self):
-        return NotImplemented
+        cards = Counter()
+        wins = self.number_of_wins()
+        # print(sorted(cards.items()))
+        for card_id in sorted(wins.keys()):
+            cards[card_id] += 1
+            cards_won = wins[card_id]
+            new_cards = {(card_id + 1 + i): cards[card_id] for i in range(cards_won)}
+            cards.update(new_cards)
+            # print(sorted(cards.items()))
+        return sum(cards.values())
 
 
-part = 1
+part = 2
 solve_example = True
 solve_example = False
-example_solutions = [13, None]
+example_solutions = [13, 30]
 
 solver = Solver(day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions)
 if solve_example:
