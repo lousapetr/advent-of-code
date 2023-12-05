@@ -97,8 +97,9 @@ then
 else
     echo "Creating solution file ${CODE_FILE}"
     DAILY_TITLE=$(curl -s "${DAILY_URL}" | grep -oP '(?<=<h2>).*(?=</h2>)')
-    sed "s|\$DAILY_URL|${DAILY_URL}|" template.py \
-        | sed "s|\$DAILY_TITLE|${DAILY_TITLE}|" \
-        | awk "/^DAY_NUMBER/{sub(\"None\", \"${DAY_NUMBER}\")} {print}" \
+    cat template.py \
+        | sed "s|DAILY_URL|${DAILY_URL}|" \
+        | sed "s|DAILY_TITLE|${DAILY_TITLE}|" \
+        | sed "s|\"DAY_NUMBER\"|${DAY_NUMBER}|" \
         > "$CODE_FILE"
 fi

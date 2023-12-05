@@ -1,9 +1,11 @@
+"""
+DAILY_TITLE
+
+DAILY_URL
+"""
+
+
 from wrapper import Wrapper
-
-# $DAILY_TITLE
-# $DAILY_URL
-
-DAY_NUMBER = None
 
 
 class Solver(Wrapper):
@@ -28,7 +30,7 @@ solve_example = True
 # solve_example = False
 example_solutions = [None, None]
 
-solver = Solver(day=DAY_NUMBER, example=solve_example, example_solutions=example_solutions)
+solver = Solver(day="DAY_NUMBER", example=solve_example, example_solutions=example_solutions)
 if solve_example:
     solver.print_input()
 solver.solve_task(1)
