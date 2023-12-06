@@ -61,7 +61,7 @@ class Wrapper(ABC):
         self.input_path = f"./inputs/{self.day:02d}_input.txt"
         self.example_path_template = f"./inputs/{self.day:02d}_input_example{{}}.txt"
         self.input: Any = None
-        self.parser: Callable = self.parse_custom
+        self.parser = self.parse_custom
         self.parser_kwargs = None
 
     def load_input(self, path: str) -> None:
