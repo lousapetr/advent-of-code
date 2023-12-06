@@ -29,8 +29,8 @@ class Solver(Wrapper):
         "how many integers solve equation `x*(time-x) - dist > 0`?"
         equation is equivalent to `x**2 - time*x + dist < 0`
         """
-        dist += 1e-6  # avoid the roots being exact integers
-        discriminant = time**2 - 4 * dist
+        dist_mod = dist + 1e-6  # avoid the roots being exact integers
+        discriminant = time**2 - 4 * dist_mod
         root_low = (time - discriminant**0.5) / 2
         root_high = (time + discriminant**0.5) / 2
         wins = math.floor(root_high) - math.ceil(root_low) + 1
