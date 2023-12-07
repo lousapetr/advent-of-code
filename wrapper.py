@@ -146,7 +146,7 @@ class Wrapper(ABC):
         matrix = [[int(i) for i in x] for x in line_list if x[0] != "#"]
         return np.array(matrix)
 
-    def parse_custom(self):
+    def parse_custom(self, path: str):
         pass
 
     def array_to_string(self, matrix: Sequence[Sequence[Any]], format: str = "1d", delimiter: str = "") -> str:
@@ -202,17 +202,14 @@ class Wrapper(ABC):
         Wrapper method that runs a task and returns the result with elapsed time.
 
         :return: result of task, time spent with calculation
-        :rtype: Tuple[Any, float]
         """
+        start_time = time.perf_counter()
         if verbose:
-            start_time = time.perf_counter()
             result = task_func()
-            end_time = time.perf_counter()
         else:
             with HiddenPrints():  # suppress all prints
-                start_time = time.perf_counter()
                 result = task_func()
-                end_time = time.perf_counter()
+        end_time = time.perf_counter()
         return result, end_time - start_time
 
     def solve_examples(self, task_func: Callable, task_number: int, verbose: bool):
