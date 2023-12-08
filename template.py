@@ -4,6 +4,7 @@ DAILY_TITLE
 DAILY_URL
 """
 
+from pprint import pprint  # noqa: F401
 
 from wrapper import Wrapper
 
