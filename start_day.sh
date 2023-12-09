@@ -64,7 +64,7 @@ then
     echo "Solution file $EXAMPLE_FILE already exists."
 else
     echo "Downloading input from ${INPUT_URL}"
-    curl --cookie "session=${TOKEN}" "$INPUT_URL" --output "$INPUT_FILE"
+    curl -s --cookie "session=${TOKEN}" "$INPUT_URL" --output "$INPUT_FILE"
     echo "================================"
 
     if grep -q -e "Please don't .* before it unlocks!" -e "404 Not Found" "$INPUT_FILE"

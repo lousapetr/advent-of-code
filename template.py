@@ -32,6 +32,9 @@ solve_example = True
 example_solutions = [None, None]
 
 solver = Solver(day="DAY_NUMBER", example=solve_example, example_solutions=example_solutions)
-solver.solve_task(1)
-if part > 1:
-    solver.solve_task(2)
+# solve always all examples, but only one final task
+if solve_example:
+    for p in range(1, part + 1):
+        solver.solve_task(p)
+else:
+    solver.solve_task(part)

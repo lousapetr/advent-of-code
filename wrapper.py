@@ -179,6 +179,23 @@ class Wrapper(ABC):
         if verbose is None:
             verbose = self.example  # be verbose if solving example
 
+        if self.example:
+            self.solve_examples(task_number, verbose)
+        else:
+            self.load_input(self.input_path)
+            if verbose:
+                self.print_input()
+            result, run_time = self.run_task(task_number, verbose)
+            print(f"Elapsed time: {run_time * 1000:{time_fmt}} ms")
+            print(f"Result: {bcolors.BOLD}{bcolors.OKBLUE}{result}{bcolors.ENDC}")
+        print("=" * 15)
+
+    def run_task(self, task_number: int, verbose: bool) -> Tuple[Any, float]:
+        """
+        Wrapper method that runs a task and returns the result with elapsed time.
+
+        :return: result of task, time spent with calculation
+        """
         if task_number == 1:
             task_func = self.task_1
         elif task_number == 2:
@@ -186,23 +203,6 @@ class Wrapper(ABC):
         else:
             raise ValueError(f"Incorrect task number - {task_number}. Must equal to 1 or 2.")
 
-        if self.example:
-            self.solve_examples(task_func, task_number, verbose)
-        else:
-            self.load_input(self.input_path)
-            if verbose:
-                self.print_input()
-            result, run_time = self.run_task(task_func, verbose)
-            print(f"Elapsed time: {run_time * 1000:{time_fmt}} ms")
-            print(f"Result: {bcolors.BOLD}{bcolors.OKBLUE}{result}{bcolors.ENDC}")
-        print("=" * 15)
-
-    def run_task(self, task_func: Callable, verbose: bool) -> Tuple[Any, float]:
-        """
-        Wrapper method that runs a task and returns the result with elapsed time.
-
-        :return: result of task, time spent with calculation
-        """
         start_time = time.perf_counter()
         if verbose:
             result = task_func()
@@ -212,7 +212,7 @@ class Wrapper(ABC):
         end_time = time.perf_counter()
         return result, end_time - start_time
 
-    def solve_examples(self, task_func: Callable, task_number: int, verbose: bool):
+    def solve_examples(self, task_number: int, verbose: bool):
         """
         Solve for example inputs and compares to expected results.
         Allows multiple input files named like `<N>_input_example.txt, <N>_input_example_1.txt,...`
@@ -226,7 +226,7 @@ class Wrapper(ABC):
         for sol, path in zip(solution, example_input_paths):
             self.load_input(path)
             self.print_input()
-            result, run_time = self.run_task(task_func, verbose)
+            result, run_time = self.run_task(task_number, verbose)
             print(f"Elapsed time: {run_time * 1000:,.1f} ms")
             if result != sol:
                 print(f"{bcolors.BOLD}{bcolors.FAIL}Incorrect solution!{bcolors.ENDC}")
