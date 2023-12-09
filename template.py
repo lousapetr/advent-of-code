@@ -32,8 +32,6 @@ solve_example = True
 example_solutions = [None, None]
 
 solver = Solver(day="DAY_NUMBER", example=solve_example, example_solutions=example_solutions)
-if solve_example:
-    solver.print_input()
 solver.solve_task(1)
 if part > 1:
     solver.solve_task(2)
