@@ -31,10 +31,10 @@ solve_example = True
 # solve_example = False
 example_solutions = [None, None]
 
-solver = Solver(day="DAY_NUMBER", example=solve_example, example_solutions=example_solutions)
+solver = Solver(day="DAY_NUMBER")
 # solve always all examples, but only one final task
 if solve_example:
     for p in range(1, part + 1):
-        solver.solve_task(p)
+        solver.solve_examples(p, example_solutions[p - 1])
 else:
-    solver.solve_task(part)
+    solver.solve_task(part, verbose=False)

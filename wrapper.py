@@ -3,7 +3,7 @@ import pprint
 import sys
 import time
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence
 
 if TYPE_CHECKING:
     import numpy as np
@@ -39,8 +39,6 @@ class Wrapper(ABC):
     def __init__(
         self,
         day: int,
-        example: bool,
-        example_solutions: Sequence[Union[int, str, Sequence[Union[int, str]]]],
     ):
         """
         Parameters
@@ -56,22 +54,17 @@ class Wrapper(ABC):
             - if there are multiple example inputs, each element might be a list or tuple
         """
         self.day = day
-        self.example = example
-        self.example_solutions = example_solutions
         self.input_path = f"./inputs/{self.day:02d}_input.txt"
         self.example_path_template = f"./inputs/{self.day:02d}_input_example{{}}.txt"
         self.input: Any = None
         self.parser = self.parse_custom
-        self.parser_kwargs = None
+        self.parser_kwargs = {}
 
     def load_input(self, path: str) -> None:
         """
         Loads input using specified parser and saves it into an internal variable.
         """
-        if self.parser_kwargs:
-            self.input = self.parser(path, **self.parser_kwargs)
-        else:
-            self.input = self.parser(path)
+        self.input = self.parser(path, **self.parser_kwargs)
 
     def print_input(self):
         """Pretty print the parsed input"""
@@ -80,7 +73,7 @@ class Wrapper(ABC):
         pprint.pprint(self.input)
         print()
 
-    def parse_to_list(self, path: str, astype: Callable = str, comment: str = "#") -> List[Any]:
+    def parse_to_list(self, path: str, astype: Callable = str, comment: str = "#") -> list[Any]:
         """Parse input file to list of lines
 
         Parameters
@@ -155,8 +148,8 @@ class Wrapper(ABC):
         """
         return "\n".join(f"{delimiter}".join(f"{num:{format}}" for num in row) for row in matrix)
 
-    def solve_task(self, task_number: int, verbose: Optional[bool] = None, time_fmt: str = ",.1f"):
-        """Wrapper for solving tasks
+    def solve_task(self, task_number: int, verbose: bool = False, time_fmt: str = ",.1f"):
+        """Wrapper for solving tasks with full input
 
         - selects appropriate function to run
         - measures elapsed time
@@ -170,27 +163,20 @@ class Wrapper(ABC):
         verbose : bool, optional
             if False, suppress all prints
             if True, allow printing
-            by default None - True if self.example is True, False otherwise
         time_fmt : str, optional
             format for printing elapsed time, by default ',.1f'
         """
         print("=" * 15)
         print(f"Task {task_number}")
-        if verbose is None:
-            verbose = self.example  # be verbose if solving example
-
-        if self.example:
-            self.solve_examples(task_number, verbose)
-        else:
-            self.load_input(self.input_path)
-            if verbose:
-                self.print_input()
-            result, run_time = self.run_task(task_number, verbose)
-            print(f"Elapsed time: {run_time * 1000:{time_fmt}} ms")
-            print(f"Result: {bcolors.BOLD}{bcolors.OKBLUE}{result}{bcolors.ENDC}")
+        self.load_input(self.input_path)
+        if verbose:
+            self.print_input()
+        result, run_time = self.run_task(task_number, verbose)
+        print(f"Elapsed time: {run_time * 1000:{time_fmt}} ms")
+        print(f"Result: {bcolors.BOLD}{bcolors.OKBLUE}{result}{bcolors.ENDC}")
         print("=" * 15)
 
-    def run_task(self, task_number: int, verbose: bool) -> Tuple[Any, float]:
+    def run_task(self, task_number: int, verbose: bool) -> tuple[int | str, float]:
         """
         Wrapper method that runs a task and returns the result with elapsed time.
 
@@ -212,18 +198,27 @@ class Wrapper(ABC):
         end_time = time.perf_counter()
         return result, end_time - start_time
 
-    def solve_examples(self, task_number: int, verbose: bool):
+    def solve_examples(
+        self, task_number: int, solution: Optional[int | str | Sequence[int | str]], verbose: bool = True
+    ):
         """
         Solve for example inputs and compares to expected results.
         Allows multiple input files named like `<N>_input_example.txt, <N>_input_example_1.txt,...`
         """
-        solution = self.example_solutions[task_number - 1]
-        if type(solution) in (int, str) or solution is None:
-            solution = [solution]
-        solution = list(solution)  # type: ignore
-        path_extensions = [""] + [f"_{i}" for i in range(1, len(solution))]
+        print("=" * 15)
+        print(f"Task {task_number} - Example")
+
+        if solution is None:
+            raise ValueError("You did not provide any solution!")
+        elif isinstance(solution, (int, str)):
+            solution_list = [solution]
+        else:
+            solution_list = solution
+
+        path_extensions = [""] + [f"_{i}" for i in range(1, len(solution_list))]
         example_input_paths = [self.example_path_template.format(ext) for ext in path_extensions]
-        for sol, path in zip(solution, example_input_paths):
+
+        for sol, path in zip(solution_list, example_input_paths):
             self.load_input(path)
             self.print_input()
             result, run_time = self.run_task(task_number, verbose)
@@ -235,11 +230,12 @@ class Wrapper(ABC):
             else:
                 print(f"{bcolors.BOLD}{bcolors.OKGREEN}Correct solution!{bcolors.ENDC}")
                 print(f"Result: {bcolors.OKBLUE}{result}{bcolors.ENDC}")
+            print("=" * 15)
 
     @abstractmethod
-    def task_1(self) -> Union[int, str]:
+    def task_1(self) -> int | str:
         pass
 
     @abstractmethod
-    def task_2(self) -> Union[int, str]:
+    def task_2(self) -> int | str:
         pass
