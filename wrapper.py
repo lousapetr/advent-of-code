@@ -5,6 +5,8 @@ import time
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence
 
+import requests
+
 if TYPE_CHECKING:
     import numpy as np
     import pandas as pd
@@ -38,27 +40,28 @@ class bcolors:
 class Wrapper(ABC):
     def __init__(
         self,
+        year: int,
         day: int,
     ):
         """
         Parameters
         ----------
+        year : int
+            current year - used for setting paths and for final submission
         day : int
             number of current day - used for setting paths to inputs
         example : bool
             True if using example input
             False if using real task input
-        example_solutions:
-            - 2-element list containing correct solutions for example of Part 1 and Part 2
-            - initially (before solving Part 1), second element is None
-            - if there are multiple example inputs, each element might be a list or tuple
         """
+        self.year = year
         self.day = day
         self.input_path = f"./inputs/{self.day:02d}_input.txt"
         self.example_path_template = f"./inputs/{self.day:02d}_input_example{{}}.txt"
-        self.input: Any = None
         self.parser = self.parse_custom
         self.parser_kwargs = {}
+        # TODO fix the parser type - try https://chat.openai.com/share/5f75c0e9-698a-408f-ad50-92b9a880fc98 (last part)
+        self.input = self.parser(self.example_path_template.format(""), **self.parser_kwargs)
 
     def load_input(self, path: str) -> None:
         """
@@ -198,12 +201,31 @@ class Wrapper(ABC):
         end_time = time.perf_counter()
         return result, end_time - start_time
 
+    def submit_answer(self, task_number: int) -> None:
+        """
+        Submit the final answer to the AoC webpage and evaluate the success.
+        """
+        # TODO submit the answer automatically using requests.post
+        _ = requests
+        pass
+
     def solve_examples(
         self, task_number: int, solution: Optional[int | str | Sequence[int | str]], verbose: bool = True
     ):
         """
         Solve for example inputs and compares to expected results.
         Allows multiple input files named like `<N>_input_example.txt, <N>_input_example_1.txt,...`
+
+        Parameters
+        ----------
+        task_number :
+            number of currently running Part, either 1 or 2
+        example_solutions :
+            - correct solution for example input of a single task
+            - if there are multiple example inputs, it might be a list or tuple
+        verbose :
+            if True (default), allow all prints
+            if False, remove all printing from the output
         """
         print("=" * 15)
         print(f"Task {task_number} - Example")

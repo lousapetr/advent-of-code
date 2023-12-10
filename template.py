@@ -31,7 +31,7 @@ solve_example = True
 # solve_example = False
 example_solutions = [None, None]
 
-solver = Solver(day="DAY_NUMBER")
+solver = Solver(year="YEAR_NUMBER", day="DAY_NUMBER")
 # solve always all examples, but only one final task
 if solve_example:
     for p in range(1, part + 1):

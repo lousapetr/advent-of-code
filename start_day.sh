@@ -101,5 +101,6 @@ else
         | sed "s|DAILY_URL|${DAILY_URL}|" \
         | sed "s|DAILY_TITLE|${DAILY_TITLE}|" \
         | sed "s|\"DAY_NUMBER\"|${DAY_NUMBER}|" \
+        | sed "s|\"YEAR_NUMBER\"|${YEAR}|" \
         > "$CODE_FILE"
 fi
