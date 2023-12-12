@@ -145,11 +145,11 @@ class Wrapper(ABC):
     def parse_custom(self, path: str):
         pass
 
-    def array_to_string(self, matrix: Sequence[Sequence[Any]], format: str = "1d", delimiter: str = "") -> str:
+    def array_to_string(self, matrix: Sequence[Sequence[Any]], fmt: str = "1", delimiter: str = "") -> str:
         """
-        Create string representation of numpy matrix
+        Create string representation of a 2D array
         """
-        return "\n".join(f"{delimiter}".join(f"{num:{format}}" for num in row) for row in matrix)
+        return "\n".join(f"{delimiter}".join(f"{num:{fmt}}" for num in row) for row in matrix)
 
     def solve_task(self, task_number: int, verbose: bool = False, time_fmt: str = ",.1f"):
         """Wrapper for solving tasks with full input
