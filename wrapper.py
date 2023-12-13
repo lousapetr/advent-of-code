@@ -145,7 +145,8 @@ class Wrapper(ABC):
     def parse_custom(self, path: str):
         pass
 
-    def array_to_string(self, matrix: Sequence[Sequence[Any]], fmt: str = "1", delimiter: str = "") -> str:
+    @staticmethod
+    def array_to_string(matrix: Sequence[Sequence[Any]], fmt: str = "1", delimiter: str = "") -> str:
         """
         Create string representation of a 2D array
         """
