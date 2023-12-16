@@ -38,3 +38,4 @@ if solve_example:
         solver.solve_examples(p, example_solutions[p - 1])
 else:
     solver.solve_task(part, verbose=False)
+    solver.submit_answer(part)

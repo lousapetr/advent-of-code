@@ -13,6 +13,7 @@ aoc_token.txt
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+.vscode
 
 # Python virtual environment
 .venv

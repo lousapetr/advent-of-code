@@ -25,7 +25,7 @@ class HiddenPrints:
         sys.stdout = self._original_stdout
 
 
-class bcolors:
+class Colors:
     HEADER = "\033[95m"
     OKBLUE = "\033[94m"
     OKCYAN = "\033[96m"
@@ -35,6 +35,26 @@ class bcolors:
     ENDC = "\033[0m"
     BOLD = "\033[1m"
     UNDERLINE = "\033[4m"
+
+    @classmethod
+    def bold(cls, string: Any) -> str:
+        return f"{cls.BOLD}{string}{cls.ENDC}"
+
+    @classmethod
+    def fail(cls, string: Any) -> str:
+        return f"{cls.BOLD}{cls.FAIL}{string}{cls.ENDC}"
+
+    @classmethod
+    def warning(cls, string: Any) -> str:
+        return f"{cls.WARNING}{string}{cls.ENDC}"
+
+    @classmethod
+    def okblue(cls, string: Any) -> str:
+        return f"{cls.OKBLUE}{string}{cls.ENDC}"
+
+    @classmethod
+    def okgreen(cls, string: Any) -> str:
+        return f"{cls.BOLD}{cls.OKGREEN}{string}{cls.ENDC}"
 
 
 class Wrapper(ABC):
@@ -62,6 +82,7 @@ class Wrapper(ABC):
         self.parser_kwargs = {}
         # TODO fix the parser type - try https://chat.openai.com/share/5f75c0e9-698a-408f-ad50-92b9a880fc98 (last part)
         self.input = self.parser(self.example_path_template.format(""), **self.parser_kwargs)
+        self.result: int | str = "Not found yet"
 
     def load_input(self, path: str) -> None:
         """
@@ -152,7 +173,7 @@ class Wrapper(ABC):
         """
         return "\n".join(f"{delimiter}".join(f"{num:{fmt}}" for num in row) for row in matrix)
 
-    def solve_task(self, task_number: int, verbose: bool = False, time_fmt: str = ",.1f"):
+    def solve_task(self, task_number: int, verbose: bool = False, time_fmt: str = ",.1f") -> None:
         """Wrapper for solving tasks with full input
 
         - selects appropriate function to run
@@ -175,9 +196,9 @@ class Wrapper(ABC):
         self.load_input(self.input_path)
         if verbose:
             self.print_input()
-        result, run_time = self.run_task(task_number, verbose)
+        self.result, run_time = self.run_task(task_number, verbose)
         print(f"Elapsed time: {run_time * 1000:{time_fmt}} ms")
-        print(f"Result: {bcolors.BOLD}{bcolors.OKBLUE}{result}{bcolors.ENDC}")
+        print(f"Result: {Colors.okblue(self.result)}")
         print("=" * 15)
 
     def run_task(self, task_number: int, verbose: bool) -> tuple[int | str, float]:
@@ -207,8 +228,19 @@ class Wrapper(ABC):
         Submit the final answer to the AoC webpage and evaluate the success.
         """
         # TODO submit the answer automatically using requests.post
-        _ = requests
-        pass
+        with open("./aoc_token.txt") as f:
+            cookie = f.read().strip()
+        url = f"https://adventofcode.com/{self.year}/day/{self.day}/answer"
+        r = requests.post(
+            url, data={"level": str(task_number), "answer": str(self.result)}, cookies={"session": cookie}
+        )
+        text = r.content.decode().split("article")[1]
+        print(text)
+        if "gold star" in text:
+            print(Colors.okgreen("Correct solution!"))
+            print(f"Go to {Colors.bold(url)}")
+        if "not the right answer" in text:
+            print(Colors.fail("Not the right answer!"))
 
     def solve_examples(
         self, task_number: int, solution: Optional[int | str | Sequence[int | str]], verbose: bool = True
@@ -247,12 +279,12 @@ class Wrapper(ABC):
             result, run_time = self.run_task(task_number, verbose)
             print(f"Elapsed time: {run_time * 1000:,.1f} ms")
             if result != sol:
-                print(f"{bcolors.BOLD}{bcolors.FAIL}Incorrect solution!{bcolors.ENDC}")
-                print(f"Should get:  {bcolors.OKBLUE}{sol}{bcolors.ENDC}")
-                print(f"Got instead: {bcolors.WARNING}{result}{bcolors.ENDC}")
+                print(Colors.fail("Incorrect solution!"))
+                print(f"Should get:  {Colors.okblue(sol)}")
+                print(f"Got instead: {Colors.warning(result)}")
             else:
-                print(f"{bcolors.BOLD}{bcolors.OKGREEN}Correct solution!{bcolors.ENDC}")
-                print(f"Result: {bcolors.OKBLUE}{result}{bcolors.ENDC}")
+                print(Colors.okgreen("Correct solution!"))
+                print(f"Result: {Colors.okblue(result)}")
             print("=" * 15)
 
     @abstractmethod
