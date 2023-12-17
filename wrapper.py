@@ -230,15 +230,19 @@ class Wrapper(ABC):
         # TODO submit the answer automatically using requests.post
         with open("./aoc_token.txt") as f:
             cookie = f.read().strip()
-        url = f"https://adventofcode.com/{self.year}/day/{self.day}/answer"
+        base_url = f"https://adventofcode.com/{self.year}/day/{self.day}"
         r = requests.post(
-            url, data={"level": str(task_number), "answer": str(self.result)}, cookies={"session": cookie}
+            f"{base_url}/answer",
+            data={"level": str(task_number), "answer": str(self.result)},
+            cookies={"session": cookie},
         )
         text = r.content.decode().split("article")[1]
         print(text)
         if "gold star" in text:
-            print(Colors.okgreen("Correct solution!"))
-            print(f"Go to {Colors.bold(url)}")
+            print(Colors.okgreen("Correct solution! I'm one GOLD STAR closer to Christmas!"))
+            if "Continue to Part Two" in text:
+                url_part2 = f"{base_url}#part2"
+                print(f"Go to {Colors.bold(url_part2)}")
         if "not the right answer" in text:
             print(Colors.fail("Not the right answer!"))
 
