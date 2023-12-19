@@ -236,14 +236,15 @@ class Wrapper(ABC):
             data={"level": str(task_number), "answer": str(self.result)},
             cookies={"session": cookie},
         )
+
         text = r.content.decode().split("article")[1]
-        print(text)
         if "gold star" in text:
-            print(Colors.okgreen("Correct solution! I'm one GOLD STAR closer to Christmas!"))
+            print(Colors.okgreen(f"Correct solution! I'm one GOLD STAR {'🌟' * task_number} closer to Christmas!"))
             if "Continue to Part Two" in text:
                 url_part2 = f"{base_url}#part2"
                 print(f"Go to {Colors.bold(url_part2)}")
         if "not the right answer" in text:
+            print(text)
             print(Colors.fail("Not the right answer!"))
 
     def solve_examples(

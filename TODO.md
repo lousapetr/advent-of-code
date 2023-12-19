@@ -1,5 +1,5 @@
 # TODO
 
 - [ ] move solutions and inputs to year-specific folder
-- [ ] implement automatic submit of the result
+- [x] implement automatic submit of the result
 - [ ] use `loguru` or `icecream` instead of prints
