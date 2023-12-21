@@ -97,7 +97,7 @@ class Wrapper(ABC):
         pprint.pprint(self.input)
         print()
 
-    def parse_to_list(self, path: str, astype: Callable = str, comment: str = "#") -> list[Any]:
+    def parse_to_list(self, path: str, astype: Callable = str, comment: str = "None") -> list[Any]:
         """Parse input file to list of lines
 
         Parameters
@@ -107,7 +107,7 @@ class Wrapper(ABC):
         astype: Callable
             convert each line by given function
         comment : str, optional
-            ignore lines starting by this character, by default '#'
+            ignore lines starting by this character, by default 'None'
 
         Returns
         -------
