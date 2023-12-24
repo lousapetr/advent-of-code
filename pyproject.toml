@@ -13,30 +13,24 @@ requests = "^2.31.0"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.5.0"
-black = "^23.11.0"
-isort = "^5.12.0"
 ipython = "^8.18.1"
-flake8-pyproject = "^1.2.3"
+ruff = "^0.1.9"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.black]
+[tool.ruff]
+# defaults from https://docs.astral.sh/ruff/configuration/
+extend-exclude = ["__pycache__"]
 line-length = 120
+target-version = "py310"
 
-[tool.isort]
-profile = "black"
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+select = ["E", "F", "I"]
+ignore = []
 
-[tool.flake8]
-max-line-length = 120
-exclude = ".venv"
-extend-ignore = "E203"
-# ignore = E302, E305, F821, W292, W503
-# E302 	expected 2 blank lines, found 0
-# E305 	expected 2 blank lines after end of function or class
-# F821 	undefined name
-# W292 	no newline at end of file
-# W391 	blank line at end of file
-# W503 (*) 	line break before binary operator
-# F401 imported but unused
+[tool.ruff.format]
