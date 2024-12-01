@@ -3,13 +3,11 @@ import pprint
 import sys
 import time
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence
+from typing import Any, Callable, Optional, Sequence
 
+import numpy as np
+import pandas as pd
 import requests
-
-if TYPE_CHECKING:
-    import numpy as np
-    import pandas as pd
 
 
 class HiddenPrints:
@@ -58,11 +56,7 @@ class Colors:
 
 
 class Wrapper(ABC):
-    def __init__(
-        self,
-        year: int,
-        day: int,
-    ):
+    def __init__(self, year: int, day: int):
         """
         Parameters
         ----------
@@ -76,8 +70,8 @@ class Wrapper(ABC):
         """
         self.year = year
         self.day = day
-        self.input_path = f"./inputs/{self.day:02d}_input.txt"
-        self.example_path_template = f"./inputs/{self.day:02d}_input_example{{}}.txt"
+        self.input_path = f"./inputs_{year}/{day:02d}_input.txt"
+        self.example_path_template = f"./inputs_{year}/{self.day:02d}_input_example{{}}.txt"
         self.parser = self.parse_custom
         self.parser_kwargs = {}
         # TODO fix the parser type - try https://chat.openai.com/share/5f75c0e9-698a-408f-ad50-92b9a880fc98 (last part)
@@ -121,7 +115,7 @@ class Wrapper(ABC):
         except ValueError:
             return lines
 
-    def parse_to_pandas_df(self, path: str, **kwargs) -> "pd.DataFrame":
+    def parse_to_pandas_df(self, path: str, **kwargs) -> pd.DataFrame:
         """Parse input file to pandas dataframe, can specify delimiter, header, names, dtype or other
 
         Parameters
@@ -134,17 +128,15 @@ class Wrapper(ABC):
         pd.DataFrame
             dataframe interpreting the input file as CSV
         """
-        import pandas as pd
-
-        kwargs.setdefault("delimiter", " ")
+        kwargs.setdefault("sep", r"\s+")
         kwargs.setdefault("header", None)
         kwargs.setdefault("names", None)
         kwargs.setdefault("dtype", int)
-        text_reader = pd.read_csv(path, **kwargs)
-        df = pd.concat(text_reader, ignore_index=True)
+        df = pd.read_csv(path, **kwargs)
+        # df = pd.concat(text_reader, ignore_index=True)
         return df
 
-    def parse_to_array(self, path: str) -> "np.ndarray":
+    def parse_to_array(self, path: str) -> np.ndarray:
         """Parse input file to numpy array, ignoring lines starting by `#`
 
         Parameters
@@ -157,8 +149,6 @@ class Wrapper(ABC):
         np.ndarray[int]
             numpy array of integers
         """
-        import numpy as np
-
         line_list = self.parse_to_list(path)
         matrix = [[int(i) for i in x] for x in line_list if x[0] != "#"]
         return np.array(matrix)
@@ -228,7 +218,7 @@ class Wrapper(ABC):
         Submit the final answer to the AoC webpage and evaluate the success.
         """
         # TODO submit the answer automatically using requests.post
-        with open("./aoc_token.txt") as f:
+        with open(f"./aoc_token_{self.year}.txt") as f:
             cookie = f.read().strip()
         base_url = f"https://adventofcode.com/{self.year}/day/{self.day}"
         r = requests.post(
@@ -248,7 +238,10 @@ class Wrapper(ABC):
             print(Colors.fail("Not the right answer!"))
 
     def solve_examples(
-        self, task_number: int, solution: Optional[int | str | Sequence[int | str]], verbose: bool = True
+        self,
+        task_number: int,
+        solution: Optional[int | str | Sequence[int | str]],
+        verbose: bool = True,
     ):
         """
         Solve for example inputs and compares to expected results.

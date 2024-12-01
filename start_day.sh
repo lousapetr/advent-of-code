@@ -1,10 +1,11 @@
 #!/bin/bash
 
-YEAR=2023
+YEAR=2024
 
 # find your token like this https://github.com/wimglenn/advent-of-code-wim/issues/1
 # and save to file 'aoc_token.txt' - add it to .gitignore to not share
-TOKEN=$(cat aoc_token.txt)
+TOKEN_FILE="aoc_token_${YEAR}.txt"
+TOKEN=$(cat ${TOKEN_FILE})
 
 HELP=""
 
@@ -41,14 +42,16 @@ esac
 ##############################
 # Set paths
 echo "Day $DAY_NUMBER begins!"
+mkdir -p "./code_${YEAR}"
+mkdir -p "./inputs_${YEAR}"
 
 DAY_PAD=$(printf '%02d' $DAY_NUMBER)
 
 DAILY_URL="https://adventofcode.com/${YEAR}/day/${DAY_NUMBER}"
 INPUT_URL="${DAILY_URL}/input"
-INPUT_FILE="./inputs/${DAY_PAD}_input.txt"
-EXAMPLE_FILE="./inputs/${DAY_PAD}_input_example.txt"
-CODE_FILE="./${DAY_PAD}.py"
+INPUT_FILE="./inputs_${YEAR}/${DAY_PAD}_input.txt"
+EXAMPLE_FILE="./inputs_${YEAR}/${DAY_PAD}_input_example.txt"
+CODE_FILE="./code_${YEAR}/${DAY_PAD}.py"
 
 
 ##############################
@@ -76,8 +79,8 @@ else
     if grep -q -e "Please log in to get your puzzle input." "$INPUT_FILE"
     then
         echo "AOC session token invalid, see https://github.com/wimglenn/advent-of-code-wim/issues/1"
-        touch aoc_token.txt
-        echo "Put valid token into file aoc_token.txt"
+        touch "${TOKEN_FILE}"
+        echo "Put valid token into file ${TOKEN_FILE}"
         rm "$INPUT_FILE"
         exit 1
     fi
@@ -97,7 +100,7 @@ then
 else
     echo "Creating solution file ${CODE_FILE}"
     DAILY_TITLE=$(curl -s "${DAILY_URL}" | grep -oP '(?<=<h2>).*(?=</h2>)')
-    cat template.py \
+    cat ./advent_of_code_utils/template.py \
         | sed "s|DAILY_URL|${DAILY_URL}|" \
         | sed "s|DAILY_TITLE|${DAILY_TITLE}|" \
         | sed "s|\"DAY_NUMBER\"|${DAY_NUMBER}|" \

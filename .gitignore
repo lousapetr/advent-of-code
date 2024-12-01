@@ -4,7 +4,7 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 # AoC token
-aoc_token.txt
+aoc_token*.txt
 
 # AoC inputs
 # https://www.reddit.com/r/adventofcode/wiki/faqs/copyright/inputs/
