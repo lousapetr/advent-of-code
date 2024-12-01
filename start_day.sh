@@ -1,6 +1,6 @@
 #!/bin/bash
 
-YEAR=2022
+YEAR=2023
 
 # find your token like this https://github.com/wimglenn/advent-of-code-wim/issues/1
 # and save to file 'aoc_token.txt' - add it to .gitignore to not share
@@ -42,7 +42,7 @@ esac
 # Set paths
 echo "Day $DAY_NUMBER begins!"
 
-DAY_PAD=$(printf '%02s' $DAY_NUMBER)
+DAY_PAD=$(printf '%02d' $DAY_NUMBER)
 
 DAILY_URL="https://adventofcode.com/${YEAR}/day/${DAY_NUMBER}"
 INPUT_URL="${DAILY_URL}/input"
@@ -64,7 +64,7 @@ then
     echo "Solution file $EXAMPLE_FILE already exists."
 else
     echo "Downloading input from ${INPUT_URL}"
-    curl --cookie "session=${TOKEN}" "$INPUT_URL" --output "$INPUT_FILE"
+    curl -s --cookie "session=${TOKEN}" "$INPUT_URL" --output "$INPUT_FILE"
     echo "================================"
 
     if grep -q -e "Please don't .* before it unlocks!" -e "404 Not Found" "$INPUT_FILE"
@@ -97,8 +97,10 @@ then
 else
     echo "Creating solution file ${CODE_FILE}"
     DAILY_TITLE=$(curl -s "${DAILY_URL}" | grep -oP '(?<=<h2>).*(?=</h2>)')
-    sed "s|\$DAILY_URL|${DAILY_URL}|" template.py \
-        | sed "s|\$DAILY_TITLE|${DAILY_TITLE}|" \
-        | awk "/^DAY_NUMBER/{sub(\"None\", \"${DAY_NUMBER}\")} {print}" \
+    cat template.py \
+        | sed "s|DAILY_URL|${DAILY_URL}|" \
+        | sed "s|DAILY_TITLE|${DAILY_TITLE}|" \
+        | sed "s|\"DAY_NUMBER\"|${DAY_NUMBER}|" \
+        | sed "s|\"YEAR_NUMBER\"|${YEAR}|" \
         > "$CODE_FILE"
 fi

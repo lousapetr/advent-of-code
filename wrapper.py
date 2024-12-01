@@ -3,10 +3,13 @@ import pprint
 import sys
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Callable, List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence
 
-import numpy as np
-import pandas as pd
+import requests
+
+if TYPE_CHECKING:
+    import numpy as np
+    import pandas as pd
 
 
 class HiddenPrints:
@@ -22,7 +25,7 @@ class HiddenPrints:
         sys.stdout = self._original_stdout
 
 
-class bcolors:
+class Colors:
     HEADER = "\033[95m"
     OKBLUE = "\033[94m"
     OKCYAN = "\033[96m"
@@ -33,44 +36,59 @@ class bcolors:
     BOLD = "\033[1m"
     UNDERLINE = "\033[4m"
 
+    @classmethod
+    def bold(cls, string: Any) -> str:
+        return f"{cls.BOLD}{string}{cls.ENDC}"
+
+    @classmethod
+    def fail(cls, string: Any) -> str:
+        return f"{cls.BOLD}{cls.FAIL}{string}{cls.ENDC}"
+
+    @classmethod
+    def warning(cls, string: Any) -> str:
+        return f"{cls.WARNING}{string}{cls.ENDC}"
+
+    @classmethod
+    def okblue(cls, string: Any) -> str:
+        return f"{cls.OKBLUE}{string}{cls.ENDC}"
+
+    @classmethod
+    def okgreen(cls, string: Any) -> str:
+        return f"{cls.BOLD}{cls.OKGREEN}{string}{cls.ENDC}"
+
 
 class Wrapper(ABC):
     def __init__(
         self,
+        year: int,
         day: int,
-        example: bool,
-        example_solutions: Sequence[Union[int, str, Sequence[Union[int, str]]]],
     ):
         """
         Parameters
         ----------
+        year : int
+            current year - used for setting paths and for final submission
         day : int
             number of current day - used for setting paths to inputs
         example : bool
             True if using example input
             False if using real task input
-        example_solutions:
-            - 2-element list containing correct solutions for example of Part 1 and Part 2
-            - initially (before solving Part 1), second element is None
-            - if there are multiple example inputs, each element might be a list or tuple
         """
+        self.year = year
         self.day = day
-        self.example = example
-        self.example_solutions = example_solutions
         self.input_path = f"./inputs/{self.day:02d}_input.txt"
         self.example_path_template = f"./inputs/{self.day:02d}_input_example{{}}.txt"
-        self.input: Any = None
-        self.parser: Callable = self.parse_custom
-        self.parser_kwargs = None
+        self.parser = self.parse_custom
+        self.parser_kwargs = {}
+        # TODO fix the parser type - try https://chat.openai.com/share/5f75c0e9-698a-408f-ad50-92b9a880fc98 (last part)
+        self.input = self.parser(self.example_path_template.format(""), **self.parser_kwargs)
+        self.result: int | str = "Not found yet"
 
     def load_input(self, path: str) -> None:
         """
         Loads input using specified parser and saves it into an internal variable.
         """
-        if self.parser_kwargs:
-            self.input = self.parser(path, **self.parser_kwargs)
-        else:
-            self.input = self.parser(path)
+        self.input = self.parser(path, **self.parser_kwargs)
 
     def print_input(self):
         """Pretty print the parsed input"""
@@ -79,7 +97,7 @@ class Wrapper(ABC):
         pprint.pprint(self.input)
         print()
 
-    def parse_to_list(self, path: str, astype: Callable = str, comment: str = "#") -> List[Any]:
+    def parse_to_list(self, path: str, astype: Callable = str, comment: str = "None") -> list[Any]:
         """Parse input file to list of lines
 
         Parameters
@@ -89,7 +107,7 @@ class Wrapper(ABC):
         astype: Callable
             convert each line by given function
         comment : str, optional
-            ignore lines starting by this character, by default '#'
+            ignore lines starting by this character, by default 'None'
 
         Returns
         -------
@@ -103,7 +121,7 @@ class Wrapper(ABC):
         except ValueError:
             return lines
 
-    def parse_to_pandas_df(self, path: str, **kwargs) -> pd.DataFrame:
+    def parse_to_pandas_df(self, path: str, **kwargs) -> "pd.DataFrame":
         """Parse input file to pandas dataframe, can specify delimiter, header, names, dtype or other
 
         Parameters
@@ -116,6 +134,8 @@ class Wrapper(ABC):
         pd.DataFrame
             dataframe interpreting the input file as CSV
         """
+        import pandas as pd
+
         kwargs.setdefault("delimiter", " ")
         kwargs.setdefault("header", None)
         kwargs.setdefault("names", None)
@@ -124,7 +144,7 @@ class Wrapper(ABC):
         df = pd.concat(text_reader, ignore_index=True)
         return df
 
-    def parse_to_array(self, path: str) -> np.ndarray:
+    def parse_to_array(self, path: str) -> "np.ndarray":
         """Parse input file to numpy array, ignoring lines starting by `#`
 
         Parameters
@@ -137,21 +157,24 @@ class Wrapper(ABC):
         np.ndarray[int]
             numpy array of integers
         """
+        import numpy as np
+
         line_list = self.parse_to_list(path)
         matrix = [[int(i) for i in x] for x in line_list if x[0] != "#"]
         return np.array(matrix)
 
-    def parse_custom(self):
+    def parse_custom(self, path: str):
         pass
 
-    def array_to_string(self, matrix: np.ndarray, format: str = "1d", delimiter: str = "") -> str:
+    @staticmethod
+    def array_to_string(matrix: Sequence[Sequence[Any]], fmt: str = "1", delimiter: str = "") -> str:
         """
-        Create string representation of numpy matrix
+        Create string representation of a 2D array
         """
-        return "\n".join(f"{delimiter}".join(f"{num:{format}}" for num in row) for row in matrix)
+        return "\n".join(f"{delimiter}".join(f"{num:{fmt}}" for num in row) for row in matrix)
 
-    def solve_task(self, task_number: int, verbose: Optional[bool] = None, time_fmt: str = ",.1f"):
-        """Wrapper for solving tasks
+    def solve_task(self, task_number: int, verbose: bool = False, time_fmt: str = ",.1f") -> None:
+        """Wrapper for solving tasks with full input
 
         - selects appropriate function to run
         - measures elapsed time
@@ -165,15 +188,25 @@ class Wrapper(ABC):
         verbose : bool, optional
             if False, suppress all prints
             if True, allow printing
-            by default None - True if self.example is True, False otherwise
         time_fmt : str, optional
             format for printing elapsed time, by default ',.1f'
         """
         print("=" * 15)
         print(f"Task {task_number}")
-        if verbose is None:
-            verbose = self.example  # be verbose if solving example
+        self.load_input(self.input_path)
+        if verbose:
+            self.print_input()
+        self.result, run_time = self.run_task(task_number, verbose)
+        print(f"Elapsed time: {run_time * 1000:{time_fmt}} ms")
+        print(f"Result: {Colors.okblue(self.result)}")
+        print("=" * 15)
 
+    def run_task(self, task_number: int, verbose: bool) -> tuple[int | str, float]:
+        """
+        Wrapper method that runs a task and returns the result with elapsed time.
+
+        :return: result of task, time spent with calculation
+        """
         if task_number == 1:
             task_func = self.task_1
         elif task_number == 2:
@@ -181,63 +214,88 @@ class Wrapper(ABC):
         else:
             raise ValueError(f"Incorrect task number - {task_number}. Must equal to 1 or 2.")
 
-        if self.example:
-            self.solve_examples(task_func, task_number, verbose)
-        else:
-            self.load_input(self.input_path)
-            if verbose:
-                self.print_input()
-            result, run_time = self.run_task(task_func, verbose)
-            print(f"Elapsed time: {run_time * 1000:{time_fmt}} ms")
-            print(f"Result: {bcolors.BOLD}{bcolors.OKBLUE}{result}{bcolors.ENDC}")
-        print("=" * 15)
-
-    def run_task(self, task_func: Callable, verbose: bool) -> Tuple[Any, float]:
-        """
-        Wrapper method that runs a task and returns the result with elapsed time.
-
-        :return: result of task, time spent with calculation
-        :rtype: Tuple[Any, float]
-        """
+        start_time = time.perf_counter()
         if verbose:
-            start_time = time.perf_counter()
             result = task_func()
-            end_time = time.perf_counter()
         else:
             with HiddenPrints():  # suppress all prints
-                start_time = time.perf_counter()
                 result = task_func()
-                end_time = time.perf_counter()
+        end_time = time.perf_counter()
         return result, end_time - start_time
 
-    def solve_examples(self, task_func: Callable, task_number: int, verbose: bool):
+    def submit_answer(self, task_number: int) -> None:
+        """
+        Submit the final answer to the AoC webpage and evaluate the success.
+        """
+        # TODO submit the answer automatically using requests.post
+        with open("./aoc_token.txt") as f:
+            cookie = f.read().strip()
+        base_url = f"https://adventofcode.com/{self.year}/day/{self.day}"
+        r = requests.post(
+            f"{base_url}/answer",
+            data={"level": str(task_number), "answer": str(self.result)},
+            cookies={"session": cookie},
+        )
+
+        text = r.content.decode().split("article")[1]
+        if "gold star" in text:
+            print(Colors.okgreen(f"Correct solution! I'm one GOLD STAR {'🌟' * task_number} closer to Christmas!"))
+            if "Continue to Part Two" in text:
+                url_part2 = f"{base_url}#part2"
+                print(f"Go to {Colors.bold(url_part2)}")
+        if "not the right answer" in text:
+            print(text)
+            print(Colors.fail("Not the right answer!"))
+
+    def solve_examples(
+        self, task_number: int, solution: Optional[int | str | Sequence[int | str]], verbose: bool = True
+    ):
         """
         Solve for example inputs and compares to expected results.
         Allows multiple input files named like `<N>_input_example.txt, <N>_input_example_1.txt,...`
+
+        Parameters
+        ----------
+        task_number :
+            number of currently running Part, either 1 or 2
+        example_solutions :
+            - correct solution for example input of a single task
+            - if there are multiple example inputs, it might be a list or tuple
+        verbose :
+            if True (default), allow all prints
+            if False, remove all printing from the output
         """
-        solution = self.example_solutions[task_number - 1]
-        if type(solution) in (int, str) or solution is None:
-            solution = [solution]
-        solution = list(solution)  # type: ignore
-        path_extensions = [""] + [f"_{i}" for i in range(1, len(solution))]
+        print("=" * 15)
+        print(f"Task {task_number} - Example")
+
+        if solution is None:
+            raise ValueError("You did not provide any solution!")
+        elif isinstance(solution, (int, str)):
+            solution_list = [solution]
+        else:
+            solution_list = solution
+
+        path_extensions = [""] + [f"_{i}" for i in range(1, len(solution_list))]
         example_input_paths = [self.example_path_template.format(ext) for ext in path_extensions]
-        for sol, path in zip(solution, example_input_paths):
+
+        for sol, path in zip(solution_list, example_input_paths):
             self.load_input(path)
             self.print_input()
-            result, run_time = self.run_task(task_func, verbose)
+            result, run_time = self.run_task(task_number, verbose)
             print(f"Elapsed time: {run_time * 1000:,.1f} ms")
             if result != sol:
-                print(f"{bcolors.BOLD}{bcolors.FAIL}Incorrect solution!{bcolors.ENDC}")
-                print(f"Should get:  {bcolors.OKBLUE}{sol}{bcolors.ENDC}")
-                print(f"Got instead: {bcolors.WARNING}{result}{bcolors.ENDC}")
+                print(Colors.fail("Incorrect solution!"))
+                print(f"Should get:  {Colors.okblue(sol)}")
+                print(f"Got instead: {Colors.warning(result)}")
             else:
-                print(f"{bcolors.BOLD}{bcolors.OKGREEN}Correct solution!{bcolors.ENDC}")
-                print(f"Result: {bcolors.OKBLUE}{result}{bcolors.ENDC}")
+                print(Colors.okgreen("Correct solution!"))
+                print(f"Result: {Colors.okblue(result)}")
+            print("=" * 15)
 
     @abstractmethod
-    def task_1(self) -> Union[int, str]:
+    def task_1(self) -> int | str:
         pass
 
     @abstractmethod
-    def task_2(self) -> Union[int, str]:
+    def task_2(self) -> int | str:
         pass
